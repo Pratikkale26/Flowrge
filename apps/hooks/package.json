@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "hooks",
   "module": "index.ts",
   "type": "module",
   "private": true,
