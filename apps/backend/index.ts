@@ -12,7 +12,7 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/zap", zapRouter);
 
 
-const PORT = 3000;
+const PORT = 3001;
 app.listen(PORT, () => {
     console.log(`Example app listening on port ${PORT}!`)
 })
