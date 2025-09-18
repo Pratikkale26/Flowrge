@@ -1,20 +1,15 @@
 {
-  "name": "processor",
+  "name": "common",
   "module": "index.ts",
   "type": "module",
   "private": true,
-  "scripts": {
-    "dev": "bun run index.ts"
+  "exports": {
+    "./common": "./index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5"
-  },
-  "dependencies": {
-    "db": "*",
-    "kafkajs": "^2.2.4",
-    "common": "*"
   }
 }

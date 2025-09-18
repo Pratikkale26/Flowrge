@@ -1,10 +1,12 @@
 {
-  "name": "processor",
+  "name": "worker",
   "module": "index.ts",
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun run index.ts"
+    "dev": "bun run index.ts",
+    "build": "bun build index.ts",
+    "start": "bun run index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
@@ -13,8 +15,8 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "db": "*",
     "kafkajs": "^2.2.4",
+    "db": "*",
     "common": "*"
   }
 }
