@@ -1,5 +1,5 @@
 {
-  "name": "hooks",
+  "name": "processor",
   "module": "index.ts",
   "type": "module",
   "private": true,
@@ -13,8 +13,7 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@types/express": "^5.0.3",
-    "express": "^5.1.0",
-    "db": "*"
+    "db": "*",
+    "kafkajs": "^2.2.4"
   }
 }
