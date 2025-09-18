@@ -8,7 +8,7 @@ import { Footer } from "../components/Footer";
 export default function Home() {
   return (
     <main className="flex flex-col h-screen w-screen">
-      <Appbar />
+      {/* <Appbar /> */}
       <Hero />
       {/* <HeroVideo /> */}
       <Footer />

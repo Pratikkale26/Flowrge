@@ -1,8 +1,11 @@
 "use client"
+import { useRouter } from "next/navigation"
 import { PrimaryButton } from "./buttons/PrimaryButton"
 import { SecondaryButton } from "./buttons/SecondaryButton"
 
 export const Hero = () => {
+    const router = useRouter();
+
     return <div className="">
         <div className="flex justify-center p-4 text-4xl font-bold text-black">
             Flowrge - Forge the Flow
@@ -13,7 +16,9 @@ export const Hero = () => {
 
         <div>
             <div className="flex justify-center p-4 gap-8">
-                <PrimaryButton onClick={() => {}}>Get Started</PrimaryButton>
+                <PrimaryButton onClick={() => {
+                    router.push('/signup')
+                }}>Get Started</PrimaryButton>
                 <SecondaryButton onClick={() => {}}>Learn More</SecondaryButton>
             </div>
         </div>
