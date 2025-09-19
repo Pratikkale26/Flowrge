@@ -11,12 +11,13 @@ export default function LoginPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    await axios.post(
+    const res =await axios.post(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signin`,
       { username: email, password }
     );
+    localStorage.setItem("token", res.data.token);
     // Redirect after successful login
-    router.push("/");
+    router.push("/dashboard");
   }
 
   return (
