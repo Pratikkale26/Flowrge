@@ -1,6 +1,7 @@
 import { prisma } from "db/prisma";
 import { Kafka } from "kafkajs";
 import { TOPIC_NAME } from "common/common";
+import { parseAction } from "./utils/parser";
 
 const kafka = new Kafka({
   clientId: 'outbox-processor',
@@ -58,12 +59,19 @@ async function main() {
                 return;
             }
 
-            if(currentAction.type.id === "email") {
+            const parsed = parseAction(currentAction);
+            // console.log(parsed);
+
+            if(parsed.type === "email") {
                 console.log("Sending email...");
+                console.log(parsed.data.email);
+                console.log(parsed.data.body);
             }
 
-            if(currentAction.type.id === "sol") {
+            if(parsed.type === "sol") {
                 console.log("Sending SOL...");
+                console.log(parsed.data.address);
+                console.log(parsed.data.amount);
             }
 
             // stops the consumer for 500ms

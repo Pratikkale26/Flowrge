@@ -1,0 +1,35 @@
+
+type EmailPayload = { email: string; body: string };
+type SolPayload   = { address: string; amount: number };
+
+type ParsedAction =
+  | { type: 'email'; data: EmailPayload }
+  | { type: 'sol';   data: SolPayload };
+
+export function parseAction(action: {
+  type: { id: string };
+  metadata: any;
+}): ParsedAction {
+  switch (action.type.id) {
+    case 'email':
+      return {
+        type: 'email',
+        data: {
+          email: action.metadata.email,
+          body: action.metadata.body,
+        },
+      };
+
+    case 'sol':
+      return {
+        type: 'sol',
+        data: {
+          address: action.metadata.address,
+          amount: Number(action.metadata.amount),
+        },
+      };
+
+    default:
+      throw new Error(`Unsupported action type: ${action.type.id}`);
+  }
+}
