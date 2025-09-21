@@ -88,7 +88,7 @@ function ZapTable({ zaps }: {zaps: Zap[]}) {
             <div className="flex-1 flex"><img src={z.trigger.type.image} className="w-[30px] h-[30px]" /> {z.actions.map(x => <img src={x.type.image} className="w-[30px] h-[30px]" />)}</div>
             <div className="flex-1">{z.id}</div>
             <div className="flex-1">sept 19, 2025</div>
-            <div className="flex-1">{`${process.env.HOOKS_URL}/hooks/catch/1/${z.id}`}</div>
+            <div className="flex-1">{`${process.env.NEXT_PUBLIC_HOOKS_URL!}/hooks/catch/1/${z.id}`}</div>
             <div className="flex-1"><LinkButton onClick={() => {
                     router.push("/zap/" + z.id)
                 }}>Go</LinkButton></div>
