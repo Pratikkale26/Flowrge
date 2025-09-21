@@ -1,5 +1,5 @@
 
-type EmailPayload = { email: string; body: string };
+type EmailPayload = { email: string; subject:string; body: string };
 type SolPayload   = { address: string; amount: number };
 
 type ParsedAction =
@@ -16,6 +16,7 @@ export function parseAction(action: {
         type: 'email',
         data: {
           email: action.metadata.email,
+          subject: action.metadata.subject,
           body: action.metadata.body,
         },
       };

@@ -309,16 +309,18 @@ function SelectionModal({ onSelect, availableItems = [], isTrigger }: {
     );
 }
 
-function EmailSelector({ setMetadata }: { setMetadata: (params: { email: string; body: string }) => void }) {
+function EmailSelector({ setMetadata }: { setMetadata: (params: { email: string; subject:string; body: string }) => void }) {
     const [email, setEmail] = useState("");
     const [body, setBody] = useState("");
+    const [subject, setSubject] = useState("");
 
     return (
         <div>
             <Input label="To" type="email" placeholder="recipient@example.com" onChange={(e) => setEmail(e.target.value)} />
+            <Input label="Subject" type="text" placeholder="Your subject here" onChange={(e) => setSubject(e.target.value)} />
             <Input label="Body" type="text" placeholder="Your message here" onChange={(e) => setBody(e.target.value)} />
             <div className="pt-2">
-                <PrimaryButton onClick={() => setMetadata({ email, body })}>
+                <PrimaryButton onClick={() => setMetadata({ email, subject, body })}>
                     Confirm Action
                 </PrimaryButton>
             </div>

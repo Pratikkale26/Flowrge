@@ -60,11 +60,12 @@ async function main() {
             }
 
             const parsed = parseAction(currentAction);
-            // console.log(parsed);
+            console.log(parsed);
 
             if(parsed.type === "email") {
                 console.log("Sending email...");
                 console.log(parsed.data.email);
+                console.log(parsed.data.subject);
                 console.log(parsed.data.body);
             }
 
