@@ -2,6 +2,7 @@ import { prisma } from "db/prisma";
 import { Kafka } from "kafkajs";
 import { TOPIC_NAME } from "common/common";
 import { parseAction } from "./utils/parser";
+import { sendEmail } from "./utils/email";
 
 const kafka = new Kafka({
   clientId: 'outbox-processor',
@@ -60,13 +61,15 @@ async function main() {
             }
 
             const parsed = parseAction(currentAction);
-            console.log(parsed);
+            // console.log(parsed);
 
             if(parsed.type === "email") {
                 console.log("Sending email...");
-                console.log(parsed.data.email);
-                console.log(parsed.data.subject);
-                console.log(parsed.data.body);
+                await sendEmail({
+                    to: parsed.data.email,
+                    subject: parsed.data.subject,
+                    text: parsed.data.body
+                })
             }
 
             if(parsed.type === "sol") {

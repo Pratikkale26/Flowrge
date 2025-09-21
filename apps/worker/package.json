@@ -15,8 +15,9 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "kafkajs": "^2.2.4",
+    "common": "*",
     "db": "*",
-    "common": "*"
+    "kafkajs": "^2.2.4",
+    "resend": "^6.1.0"
   }
 }
