@@ -38,7 +38,7 @@ function useZaps() {
     useEffect(() => {
         axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/zap`, {
             headers: {
-                "Authorization": localStorage.getItem("token")
+                "Authorization": `Bearer ` + localStorage.getItem("token")
             }
         })
             .then(res => {

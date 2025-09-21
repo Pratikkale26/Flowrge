@@ -11,13 +11,20 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  e.preventDefault();
+
+  try {
     await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signup`,
-        { username: email, password, name }
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signup`,
+      { username: email, password, name }
     );
+    
     router.push("/login");
+  } catch (e) {
+    console.error("Signup failed:", e); 
+    alert("Sign-up failed. Please check your details and try again.");
   }
+}
 
   return (
     <div className="flex justify-center">

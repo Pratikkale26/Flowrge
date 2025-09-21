@@ -138,7 +138,7 @@ export default function CreateZapPage() {
                     actionMetadata: a.metadata,
                 })),
             }, {
-                headers: { Authorization: `${token}` },
+                headers: { Authorization: `Bearer ${token}` },
             });
 
             router.push("/dashboard");

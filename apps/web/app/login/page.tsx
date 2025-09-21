@@ -11,13 +11,21 @@ export default function LoginPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const res =await axios.post(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signin`,
-      { username: email, password }
-    );
-    localStorage.setItem("token", res.data.token);
-    // Redirect after successful login
-    router.push("/dashboard");
+
+    try {
+      const res =await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signin`,
+        { username: email, password }
+      );
+      const token = res.data.token;
+      localStorage.setItem("token", `${token}`);
+  
+      // Redirect after successful login
+      router.push("/dashboard");
+    } catch(e) {
+      console.log(e);
+      alert("Login failed. Please check your credentials and try again.");
+    }
   }
 
   return (
