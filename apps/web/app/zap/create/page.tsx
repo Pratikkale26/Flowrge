@@ -138,7 +138,7 @@ export default function CreateZapPage() {
                     actionMetadata: a.metadata,
                 })),
             }, {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `${token}` },
             });
 
             router.push("/dashboard");
@@ -239,7 +239,7 @@ export default function CreateZapPage() {
 // This is a scalable pattern; to support a new action, you just add an entry here.
 const ACTION_CONFIG_COMPONENTS: Record<string, React.FC<{ setMetadata: (params: any) => void }>> = {
     'email': EmailSelector,
-    'send-sol': SolanaSelector,
+    'sol': SolanaSelector,
 };
 
 /**
