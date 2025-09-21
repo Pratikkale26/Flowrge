@@ -24,7 +24,7 @@ async function main() {
 
     const messages = pendingRows.map((r) => ({
       key: r.id.toString(),          // good for partitioning
-      value: r.zapRunId,
+      value: JSON.stringify({ zapRunId: r.zapRunId, stage: 0})
     }));
 
     try {
@@ -36,7 +36,7 @@ async function main() {
       // Log when tasks are actually acknowledged by Kafka
       result.forEach(r =>
         console.log(
-          `Sent ${messages.length} messages to topic ${r.topicName}, partition ${r.partition}, baseOffset ${r.baseOffset}`
+          `processor: Sent ${messages.length} messages to topic ${r.topicName}, partition ${r.partition}, baseOffset ${r.baseOffset}`
         )
       );
 
