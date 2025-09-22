@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { Appbar } from "../components/Appbar";
+// import { Appbar } from "../components/Appbar";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -13,8 +13,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Flowrge",
-  description: "Low-code automation for Solana — create on-chain triggers and off-chain actions in minutes.",
+  title: "Flowrge - Automate on Solana in minutes",
+  description: "Triggers and actions across Web3 & Web2 without writing code. The Zapier for Solana.",
   keywords: ["Solana", "automation", "low-code", "Web3", "Flowrge"],
   openGraph: {
     title: "Flowrge",
@@ -35,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Appbar/>
+        {/* <Appbar/> */}
         {children}
       </body>
     </html>
