@@ -12,7 +12,7 @@ export const sendEmail = async ({ to, subject, text }: {
   }
 
   await resend.emails.send({
-    from: "DecentralWatch <noreply@decentralwatch.kalehub.com>",
+    from: "Flowrge <noreply@decentralwatch.kalehub.com>",
     to,
     subject,
     text,
