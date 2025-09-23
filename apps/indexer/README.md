@@ -1,15 +1,30 @@
-# indexer
+# Flowrge Indexer
 
-To install dependencies:
+The blockchain indexing service for monitoring Solana on-chain events and triggering flows based on blockchain activity.
+
+## Features
+
+- **Blockchain Monitoring**: Real-time monitoring of Solana blockchain events
+- **Event Processing**: Parse and validate blockchain transactions
+- **Flow Integration**: Automatic flow triggering based on on-chain events
+
+## Tech Stack
+
+- Bun runtime
+- Solana RPC integration
+- PostgreSQL with Prisma ORM
+
+## Getting Started
 
 ```bash
 bun install
+bun run dev
 ```
 
-To run:
+## Environment Variables
 
-```bash
-bun run index.ts
+```env
+DATABASE_URL=postgresql://username:password@localhost:5432/flowrge
+SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+HOOKS_SERVICE_URL=http://localhost:3002
 ```
-
-This project was created using `bun init` in bun v1.2.21. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.

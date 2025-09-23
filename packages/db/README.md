@@ -1,15 +1,29 @@
-# db
+# Flowrge Database Package
 
-To install dependencies:
+The shared database package providing Prisma ORM integration and database schema management for the Flowrge platform.
+
+## Features
+
+- **Database Schema**: Complete Prisma schema for all Flowrge entities
+- **Prisma Integration**: Generated Prisma client for type-safe database operations
+- **Data Models**: User accounts, flow definitions, execution tracking
+
+## Tech Stack
+
+- Prisma ORM
+- PostgreSQL
+- TypeScript
+
+## Getting Started
 
 ```bash
-bun install
+npm install
+npx prisma generate
+npx prisma migrate dev
 ```
 
-To run:
+## Environment Variables
 
-```bash
-bun run index.ts
+```env
+DATABASE_URL=postgresql://username:password@localhost:5432/flowrge
 ```
-
-This project was created using `bun init` in bun v1.2.21. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.

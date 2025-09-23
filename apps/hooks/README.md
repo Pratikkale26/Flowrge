@@ -1,15 +1,32 @@
-# hooks
+# Flowrge Hooks Service
 
-To install dependencies:
+A lightweight webhook service that receives external triggers and initiates flow executions.
+
+## Features
+
+- **Webhook Endpoints**: RESTful webhook endpoints for external services
+- **Flow Initiation**: Converts webhook payloads into flow execution requests
+- **Secure Processing**: User and flow validation
+
+## Tech Stack
+
+- Bun runtime
+- Express.js
+- PostgreSQL with Prisma ORM
+
+## Getting Started
 
 ```bash
 bun install
+bun run dev
 ```
 
-To run:
+## Environment Variables
 
-```bash
-bun run index.ts
+```env
+DATABASE_URL=postgresql://username:password@localhost:5432/flowrge
 ```
 
-This project was created using `bun init` in bun v1.2.21. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+## API Endpoints
+
+- `POST /hooks/catch/:userId/:zapId` - Receive webhook and trigger flow
