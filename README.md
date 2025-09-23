@@ -92,4 +92,4 @@ Flowrge is currently in early access. Join our waitlist to be among the first to
 
 ---
 
-**Ready to automate the future?** [Join the waitlist](https://flowrge.com) and start building flows that bridge Web2 and Web3.
+**Ready to automate the future?** [Join the waitlist](https://flowrge.xyz) and start building flows that bridge Web2 and Web3.
