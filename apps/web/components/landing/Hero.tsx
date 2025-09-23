@@ -36,9 +36,9 @@ export default function LandingHero() {
             <Button size="lg" className="bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-blue)] hover:from-[var(--neon-purple)]/80 hover:to-[var(--neon-blue)]/80 text-white px-8 py-6 text-lg animate-pulse-glow hover:scale-105 transition-all duration-300 hover:shadow-2xl group" onClick={() => document.getElementById("waitlist")?.scrollIntoView({ behavior: "smooth" })}>
               Join Waitlist <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button variant="outline" size="lg" className="border-primary/20 hover:border-primary/60 hover:bg-primary/10 px-8 py-6 text-lg bg-transparent hover:scale-105 transition-all duration-300 hover:shadow-neon group">
+            {/* <Button variant="outline" size="lg" className="border-primary/20 hover:border-primary/60 hover:bg-primary/10 px-8 py-6 text-lg bg-transparent hover:scale-105 transition-all duration-300 hover:shadow-neon group">
               Watch Demo
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>
