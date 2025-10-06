@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Zap" ADD COLUMN     "name" TEXT;
+
+-- AlterTable
+ALTER TABLE "ZapRun" ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

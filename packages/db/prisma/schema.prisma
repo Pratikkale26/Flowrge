@@ -26,6 +26,7 @@ model User {
 model Zap {
   id           String  @id @default(uuid())
   triggerId    String
+  name         String?
   userId       Int
   trigger      Trigger?
   actions      Action[]
@@ -72,6 +73,7 @@ model ZapRun {
   metadata     Json
   zap          Zap @relation(fields: [zapId], references: [id])
   zapRunOutbox ZapRunOutbox?
+  createdAt   DateTime  @default(now())
 }
 
 model ZapRunOutbox {

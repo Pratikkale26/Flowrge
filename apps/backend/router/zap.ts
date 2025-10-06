@@ -113,4 +113,38 @@ router.get("/:zapId", authMiddleware, async (req, res) => {
 
 })
 
+// get all the zaprun from the zapid
+router.get("/:zapId/zaprun", authMiddleware, async (req, res) => {
+    const zapId = req.params.zapId;
+    const userId = Number(req.id);
+
+    const zapExists = await prisma.zap.findFirst({
+        where: { id: zapId, userId: userId },
+    });
+
+    if (!zapExists) {
+        return res.status(404).json({ error: "Zap not found or access denied." });
+    }
+
+    try {
+        const zapRuns = await prisma.zapRun.findMany({
+            where: {
+                zapId: zapId, 
+            },
+            orderBy: {
+                createdAt: 'desc', // Show most recent runs first
+            },
+            take: 50, // Limit to 50 runs for dashboard view performance
+        });
+
+        return res.json({
+            zapRuns: zapRuns,
+            count: zapRuns.length
+        });
+    } catch (e) {
+        console.error("Database error fetching Zap Runs:", e);
+        return res.status(500).json({ error: "Internal server error." });
+    }
+});
+
 export const zapRouter = router;

@@ -33,6 +33,7 @@ interface ZapDetails {
     status: 'active' | 'inactive' | 'paused';
     lastExecuted?: string;
     executionCount: number;
+    zapRuns: any[]
 }
 
 export default function ZapDetailPage() {
@@ -60,6 +61,21 @@ export default function ZapDetailPage() {
 
                 const zapData = response.data.zap ?? response.data;
                 setZap(zapData);
+
+                try {
+                    const runResponse = await axios.get(
+                        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/zap/${params.id}/zaprun`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        }
+                    );
+                    console.log(runResponse.data);
+                    const zaprunData = runResponse.data;
+                    zapData.executionCount = zaprunData.count;
+                    zapData.zapRuns = zaprunData.zapRuns;
+
+                } catch (err) {
+                    console.error("Failed to fetch zapruns:", err);
+                }
             } catch (err) {
                 console.error("Failed to fetch zap details:", err);
                 setError("Failed to load zap details");
@@ -186,16 +202,35 @@ export default function ZapDetailPage() {
                         {/* Execution History */}
                         <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-6">
                         {/* zap excutions is zap run need to fetch from the database */}
-                            <h2 className="text-lg font-semibold text-foreground mb-4">Recent Executions</h2>
+                            <h2 className="text-lg font-semibold text-foreground mb-4">Executions History</h2>
                             <div className="space-y-3">
                                 {zap.executionCount > 0 ? (
-                                    <div className="text-center py-8">
-                                        <div className="w-16 h-16 mx-auto mb-4 bg-accent/10 rounded-full flex items-center justify-center">
-                                            <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                            </svg>
-                                        </div>
-                                        <p className="text-muted-foreground">Execution history will appear here</p>
+                                    // <div className="text-center py-8">
+                                    //     <div className="w-16 h-16 mx-auto mb-4 bg-accent/10 rounded-full flex items-center justify-center">
+                                    //         <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    //             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    //         </svg>
+                                    //     </div>
+                                    //     <p className="text-muted-foreground">Triggered History will appear here</p>
+                                    // </div>
+                                    <div className="space-y-3">
+                                        {zap.zapRuns.map((run) => (
+                                            <div 
+                                                key={run.id} 
+                                                className="flex items-center justify-between bg-card/70 hover:bg-card border border-border/50 rounded-lg p-3 transition-colors cursor-pointer"
+                                            >
+                                                <div className="flex flex-col">
+                                                    {/* Run Name/ID */}
+                                                    <span className="font-medium text-foreground text-sm">
+                                                        {`Execution ID: ${run.id.slice(0, 8)}...`}
+                                                    </span>
+                                                    {/* Triggered Time */}
+                                                    <span className="text-xs text-muted-foreground">
+                                                        Triggered on {formatDate(run.createdAt)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 ) : (
                                     <div className="text-center py-8">
@@ -221,7 +256,7 @@ export default function ZapDetailPage() {
                                     <span className="text-muted-foreground">Executions</span>
                                     <span className="font-semibold text-foreground">{zap.executionCount}</span>
                                 </div>
-                                <div className="flex justify-between items-center">
+                                {/* <div className="flex justify-between items-center">
                                     <span className="text-muted-foreground">Status</span>
                                     <span className={`font-semibold ${
                                         zap.status === 'active' ? 'text-green-500' : 
@@ -230,7 +265,7 @@ export default function ZapDetailPage() {
                                     }`}>
                                         {zap.status && zap.status.charAt(0).toUpperCase() + zap.status.slice(1)}
                                     </span>
-                                </div>
+                                </div> */}
                                 {zap.lastExecuted && (
                                     <div className="flex justify-between items-center">
                                         <span className="text-muted-foreground">Last Run</span>
@@ -254,7 +289,7 @@ export default function ZapDetailPage() {
                                         </code>
                                     </div>
                                 </div>
-                                <button className="w-full text-sm bg-accent/10 hover:bg-accent/20 text-accent rounded-lg py-2 px-3 transition-colors">
+                                <button onClick={() => navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_HOOKS_URL}/hooks/catch/1/${zap.id}`)} className="w-full text-sm bg-accent/10 hover:bg-accent/20 text-accent rounded-lg py-2 px-3 transition-colors">
                                     Copy URL
                                 </button>
                             </div>
