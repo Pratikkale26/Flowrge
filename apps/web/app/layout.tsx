@@ -30,15 +30,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) { 
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} bg-background text-foreground overflow-x-hidden`}>
         <WalletContextProvider>
-          <Appbar/>
-          {children}
+          <Appbar />
+          {/* Reserve space for fixed header */}
+          <main className="pt-16 relative z-0">{children}</main>
         </WalletContextProvider>
       </body>
     </html>
