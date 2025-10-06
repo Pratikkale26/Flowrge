@@ -2,7 +2,9 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LinkButton } from "../../components/buttons/LinkButton";
+import { DashboardHeader } from "../../components/dashboard/DashboardHeader";
+import { ZapGrid } from "../../components/dashboard/ZapGrid";
+import { LoadingState } from "../../components/dashboard/LoadingState";
 
 interface Zap {
     "id": string,
@@ -55,43 +57,37 @@ function useZaps() {
 export default function() {
     const { loading, zaps } = useZaps();
     const router = useRouter();
+
+    const handleEditZap = (zapId: string) => {
+        // TODO: Implement edit functionality
+        console.log("Edit zap:", zapId);
+    };
+
+    const handleDeleteZap = (zapId: string) => {
+        // TODO: Implement delete functionality
+        console.log("Delete zap:", zapId);
+    };
+
+    const handleDuplicateZap = (zapId: string) => {
+        // TODO: Implement duplicate functionality
+        console.log("Duplicate zap:", zapId);
+    };
     
-    return <div>
-        <div className="flex justify-center pt-8">
-            <div className="max-w-screen-lg	 w-full">
-                <div className="flex justify-between pr-8 ">
-                    <div className="text-2xl font-bold">
-                        My Zaps
-                    </div>
-                    <button className ="bg-amber-500 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded" onClick={() => {
-                        router.push("/zap/create");
-                    }}>Create</button>
-                </div>
+    return (
+        <div className="min-h-screen bg-background">
+            <div className="max-w-7xl mx-auto px-6 py-8">
+                <DashboardHeader />
+                {loading ? (
+                    <LoadingState />
+                ) : (
+                    <ZapGrid 
+                        zaps={zaps} 
+                        onEdit={handleEditZap}
+                        onDelete={handleDeleteZap}
+                        onDuplicate={handleDuplicateZap}
+                    />
+                )}
             </div>
         </div>
-        {loading ? "Loading..." : <div className="flex justify-center"> <ZapTable zaps={zaps} /> </div>}
-    </div>
-}
-
-function ZapTable({ zaps }: {zaps: Zap[]}) {
-    const router = useRouter();
-
-    return <div className="p-8 max-w-screen-lg w-full">
-        <div className="flex">
-                <div className="flex-1">Name</div>
-                <div className="flex-1">ID</div>
-                <div className="flex-1">Created at</div>
-                <div className="flex-1">Webhook URL</div>
-                <div className="flex-1">Go</div>
-        </div>
-        {zaps.map(z => <div className="flex border-b border-t py-4">
-            <div className="flex-1 flex"><img src={z.trigger.type.image} className="w-[30px] h-[30px]" /> {z.actions.map(x => <img src={x.type.image} className="w-[30px] h-[30px]" />)}</div>
-            <div className="flex-1">{z.id}</div>
-            <div className="flex-1">sept 19, 2025</div>
-            <div className="flex-1">{`${process.env.NEXT_PUBLIC_HOOKS_URL!}/hooks/catch/1/${z.id}`}</div>
-            <div className="flex-1"><LinkButton onClick={() => {
-                    router.push("/zap/" + z.id)
-                }}>Go</LinkButton></div>
-        </div>)}
-    </div>
+    );
 }
