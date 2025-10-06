@@ -58,7 +58,8 @@ export default function ZapDetailPage() {
                     }
                 );
 
-                setZap(response.data);
+                const zapData = response.data.zap ?? response.data;
+                setZap(zapData);
             } catch (err) {
                 console.error("Failed to fetch zap details:", err);
                 setError("Failed to load zap details");
