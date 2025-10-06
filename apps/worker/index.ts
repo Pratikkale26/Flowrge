@@ -3,6 +3,7 @@ import { Kafka } from "kafkajs";
 import { TOPIC_NAME } from "common/common";
 import { parseAction } from "./utils/parser";
 import { sendEmail } from "./utils/email";
+import { sendSol } from "./utils/sendSol";
 
 const kafka = new Kafka({
   clientId: 'outbox-processor',
@@ -74,8 +75,10 @@ async function main() {
 
             if(parsed.type === "sol") {
                 console.log("Sending SOL...");
-                console.log(parsed.data.address);
-                console.log(parsed.data.amount);
+                await sendSol(
+                    parsed.data.address, 
+                    String(parsed.data.amount)
+                );
             }
 
             // stops the consumer for 500ms

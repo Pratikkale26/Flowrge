@@ -15,8 +15,11 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@solana/web3.js": "^1.98.4",
+    "bs58": "^6.0.0",
     "common": "*",
     "db": "*",
+    "dotenv": "^17.2.3",
     "kafkajs": "^2.2.4",
     "resend": "^6.1.0"
   }
