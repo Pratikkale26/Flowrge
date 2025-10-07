@@ -7,6 +7,7 @@ import { WalletDisconnectButton, WalletMultiButton } from "@solana/wallet-adapte
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useState, useEffect } from "react";
 import { HiMenu, HiX } from "react-icons/hi";
+import { Zap } from "lucide-react";
 
 export const Appbar = () => {
   const router = useRouter();
@@ -31,17 +32,17 @@ export const Appbar = () => {
         // { label: "Docs", onClick: () => router.push("/docs") },
         // { label: "Community", onClick: () => router.push("/community") },
       ]
-    : [{ label: "Contact Sales", onClick: () => {} }];
+    : [{ label: "About", onClick: () => {} }];
 
   return (
     <header className="w-full bg-card/50 backdrop-blur-sm border-b border-border shadow-sm fixed top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center h-16">
         {/* Logo */}
-        <div
-          className="text-2xl font-bold cursor-pointer hover:text-accent transition-colors"
-          onClick={() => router.push("/")}
-        >
-          Flowrge
+        <div className="flex items-center space-x-2 group" onClick={ () => router.push("/")}>
+          <div className="w-8 h-8 bg-gradient-to-br from-[var(--neon-purple)] to-[var(--neon-blue)] rounded-lg flex items-center justify-center group-hover:scale-110 transition-all duration-300 group-hover:rotate-12">
+            <Zap className="w-5 h-5 text-white group-hover:drop-shadow-glow" />
+          </div>
+          <span className="text-xl font-bold text-balance group-hover:text-primary transition-colors">Flowrge</span>
         </div>
 
         {/* Desktop Navigation */}

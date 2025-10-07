@@ -57,6 +57,13 @@ function useZaps() {
 export default function() {
     const { loading, zaps } = useZaps();
     const router = useRouter();
+    const token = localStorage.getItem("token");
+
+    useEffect(() => {
+        if (!token) {
+            router.push("/login");
+        }
+    }, []);
 
     const handleEditZap = (zapId: string) => {
         // TODO: Implement edit functionality

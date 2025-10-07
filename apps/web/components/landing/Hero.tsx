@@ -5,8 +5,10 @@ import { useEffect, useState } from "react"
 import { ArrowRight } from "lucide-react"
 import { Badge } from "../ui/badge"
 import { Button } from "../ui/button"
+import { useRouter } from "next/navigation"
 
 export default function LandingHero() {
+  const router = useRouter();
   const [isVisible, setIsVisible] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
 
@@ -33,8 +35,11 @@ export default function LandingHero() {
             Triggers and actions across Web3 & Web2 without writing code. The first automation platform built for the Solana ecosystem.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up" style={{ animationDelay: "1s" }}>
-            <Button size="lg" className="bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-blue)] hover:from-[var(--neon-purple)]/80 hover:to-[var(--neon-blue)]/80 text-white px-8 py-6 text-lg animate-pulse-glow hover:scale-105 transition-all duration-300 hover:shadow-2xl group" onClick={() => document.getElementById("waitlist")?.scrollIntoView({ behavior: "smooth" })}>
-              Join Waitlist <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <Button size="lg" className="bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-blue)] hover:from-[var(--neon-purple)]/80 hover:to-[var(--neon-blue)]/80 text-white px-8 py-6 text-lg animate-pulse-glow hover:scale-105 transition-all duration-300 hover:shadow-2xl group" onClick={() => {
+                const token = localStorage.getItem("token"); if(token) router.push("/dashboard")
+              }
+            }>
+              Forge Now <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             {/* <Button variant="outline" size="lg" className="border-primary/20 hover:border-primary/60 hover:bg-primary/10 px-8 py-6 text-lg bg-transparent hover:scale-105 transition-all duration-300 hover:shadow-neon group">
               Watch Demo

@@ -2,7 +2,7 @@
 import { ReactNode } from "react";
 
 export const LinkButton = ({ children, onClick}: {children: ReactNode, onClick: () => void}) => {
-    return <div className="bg-gray-200 hover:bg-gray-500 hover:text-white cursor-pointer text-black font-bold py-2 px-4 rounded" onClick={onClick}>
+    return <div className="cursor-pointer text-gray-200 border border-gray-600 hover:text-white hover:bg-gray-700 hover:transform hover:scale-105 hover:border-white px-3 py-2 font-semibold rounded-full transition-all duration-200" onClick={onClick}>
         {children}
     </div>
 }
