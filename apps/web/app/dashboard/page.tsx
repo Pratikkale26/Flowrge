@@ -8,6 +8,7 @@ import { LoadingState } from "../../components/dashboard/LoadingState";
 
 interface Zap {
     "id": string,
+    "name": string,
     "triggerId": string,
     "userId": number,
     "actions": {

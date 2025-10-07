@@ -21,6 +21,7 @@ router.post("/", authMiddleware, async (req, res) => {
         // creating zap first with no trigger
         const zap = await prisma.zap.create({
             data: {
+                name: parsedData.data.zapName,
                 userId: parseInt(id),
                 triggerId: "",
                 actions: {

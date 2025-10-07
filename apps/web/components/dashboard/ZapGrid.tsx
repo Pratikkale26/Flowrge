@@ -4,6 +4,7 @@ import { ZapCard } from "./ZapCard";
 
 interface Zap {
     "id": string,
+    "name": string,
     "triggerId": string,
     "userId": number,
     "actions": {

@@ -7,6 +7,7 @@ import { PrimaryButton } from "../../../components/buttons/PrimaryButton";
 
 interface ZapDetails {
     id: string;
+    name: string;
     triggerId: string;
     userId: number;
     actions: {
@@ -146,6 +147,7 @@ export default function ZapDetailPage() {
                             </button>
                             <div>
                                 <h1 className="text-2xl font-bold text-foreground">Zap Details</h1>
+                                <p className="text-lg text-muted-foreground">Name: {zap.name}</p>
                                 <p className="text-muted-foreground">ID: {zap.id}</p>
                             </div>
                         </div>

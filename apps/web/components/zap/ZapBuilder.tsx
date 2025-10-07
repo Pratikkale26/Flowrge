@@ -5,8 +5,10 @@ import { ZapCell } from "../ZapCell";
 import { SelectedAction, SelectedTrigger } from "../../types/zap";
 
 interface ZapBuilderProps {
+    zapName: string;
     selectedTrigger: SelectedTrigger | null;
     selectedActions: SelectedAction[];
+    onZapNameChange: (newName: string) => void;
     onTriggerClick: () => void;
     onActionClick: (actionKey: number) => void;
     onAddAction: () => void;
@@ -14,8 +16,10 @@ interface ZapBuilderProps {
 }
 
 export function ZapBuilder({
+    zapName,
     selectedTrigger,
     selectedActions,
+    onZapNameChange,
     onTriggerClick,
     onActionClick,
     onAddAction,
@@ -23,6 +27,16 @@ export function ZapBuilder({
 }: ZapBuilderProps) {
     return (
         <div className="space-y-4 flex flex-col items-center">
+            {/* Name Input */}
+            <div className="flex items-center space-x-4 w-full max-w-md">
+                <input
+                type="text"
+                placeholder="Flow name?"
+                value={zapName}
+                onChange={(e) => onZapNameChange(e.target.value)}
+                className="border rounded-lg px-4 py-2 w-full bg-background/80 border-border focus:border-primary focus:ring-2 focus:ring-primary/30 outline-none transition-all duration-200 placeholder:text-muted-foreground"
+                />
+            </div>
             {/* Trigger Cell */}
             <ZapCell
                 onClick={onTriggerClick}

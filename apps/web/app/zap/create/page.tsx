@@ -30,6 +30,7 @@ export default function CreateZapPage() {
     const { availableActions, availableTriggers, isLoading, error } = useAvailableZapElements();
     const { publicKey, sendTransaction, connected } = useWallet();
 
+    const [zapName, setZapName] = useState<string>("");
     const [selectedTrigger, setSelectedTrigger] = useState<SelectedTrigger | null>(null);
     const [selectedActions, setSelectedActions] = useState<SelectedAction[]>([]);
     const [isPublishing, setIsPublishing] = useState<boolean>(false);
@@ -132,6 +133,7 @@ export default function CreateZapPage() {
             }
 
             await axios.post(`${BACKEND_URL}/api/v1/zap`, {
+                zapName: zapName,
                 availableTriggerId: selectedTrigger.id,
                 triggerMetadata: {},
                 actions: selectedActions.map(a => ({
@@ -206,8 +208,10 @@ export default function CreateZapPage() {
             />
             <main className="w-full min-h-screen bg-background flex flex-col items-center pt-10">
                 <ZapBuilder
+                    zapName={zapName}
                     selectedTrigger={selectedTrigger}
                     selectedActions={selectedActions}
+                    onZapNameChange={setZapName}
                     onTriggerClick={() => setModalState({ isOpen: true, type: 'trigger' })}
                     onActionClick={(actionKey) => setModalState({ isOpen: true, type: 'action', actionKey })}
                     onAddAction={handleAddAction}
