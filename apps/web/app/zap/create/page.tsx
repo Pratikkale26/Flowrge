@@ -135,7 +135,7 @@ export default function CreateZapPage() {
             await axios.post(`${BACKEND_URL}/api/v1/zap`, {
                 zapName: zapName,
                 availableTriggerId: selectedTrigger.id,
-                triggerMetadata: {},
+                triggerMetadata: selectedTrigger.metadata || {},
                 actions: selectedActions.map(a => ({
                     availableActionId: a.availableActionId,
                     actionMetadata: a.metadata,
@@ -174,7 +174,7 @@ export default function CreateZapPage() {
         if (modalState.isOpen) {
             if (selection) { // An item was selected
                 if (modalState.type === 'trigger') {
-                    setSelectedTrigger({ id: selection.id, name: selection.name });
+                    setSelectedTrigger({ id: selection.id, name: selection.name, metadata: selection.metadata });
                 } else if (modalState.type === 'action' && modalState.actionKey !== undefined) {
                     const { actionKey } = modalState;
                     setSelectedActions(acts => acts.map(act =>

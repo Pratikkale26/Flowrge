@@ -7,6 +7,7 @@ export interface AvailableItem {
 export interface SelectedTrigger {
     id: string;
     name: string;
+    metadata?: any;
 }
 
 export interface SelectedAction {

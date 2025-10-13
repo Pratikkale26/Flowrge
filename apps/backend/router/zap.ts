@@ -39,6 +39,7 @@ router.post("/", authMiddleware, async (req, res) => {
             data: {
                 triggerId: parsedData.data.availableTriggerId,
                 zapId: zap.id,
+                metadata: parsedData.data.triggerMetadata || {}
             }
         });
 

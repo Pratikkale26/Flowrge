@@ -7,7 +7,13 @@ async function main() {
             id: "webhook",
             name: "Webhook",
             image: "https://media.licdn.com/dms/image/v2/D4D12AQHtrdLcx2NuzQ/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1709325806317?e=2147483647&v=beta&t=DUaFfcSvxvwZCn00XhUncL3j8xFHJaSI_pcyYBrqX_4",
-            
+        }
+    })    
+    await prisma.availableTrigger.create({
+        data: {
+            id: "solana",
+            name: "Solana Transaction",
+            image: "https://upload.wikimedia.org/wikipedia/en/b/b9/Solana_logo.png",
         }
     })    
 

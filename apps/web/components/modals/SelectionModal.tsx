@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { EmailSelector } from "../action-configs/EmailSelector";
-import { SolanaSelector } from "../action-configs/SolanaSelector";
+import { SolanaSelector as ActionSolanaSelector } from "../action-configs/SolanaSelector";
+import { SolanaSelector as TriggerSolanaSelector } from "../trigger-configs/SolanaSelector";
 
 interface AvailableItem {
     id: string;
@@ -23,21 +24,45 @@ interface SelectionModalProps {
 // A map to associate action IDs with their specific configuration components.
 const ACTION_CONFIG_COMPONENTS: Record<string, React.FC<{ setMetadata: (params: any) => void }>> = {
     'email': EmailSelector,
-    'sol': SolanaSelector,
+    'sol': ActionSolanaSelector,
+};
+
+// A map to associate trigger IDs with their specific configuration components.
+const TRIGGER_CONFIG_COMPONENTS: Record<string, React.FC<{ setMetadata: (params: any) => void }>> = {
+    'sol': TriggerSolanaSelector,
 };
 
 export function SelectionModal({ onSelect, availableItems = [], isTrigger }: SelectionModalProps) {
     const [step, setStep] = useState(0);
     const [selectedItem, setSelectedItem] = useState<AvailableItem | null>(null);
 
+    // Normalize an item into a lookup key for config components (DB ids are UUIDs)
+    const getLookupKey = (item: AvailableItem) => {
+        const normalized = (item.name || "").trim().toLowerCase();
+        if (normalized.includes("solana")) return "sol";
+        if (normalized.includes("email")) return "email";
+        return item.id; // fallback to id
+    };
+
     const handleItemClick = (item: AvailableItem) => {
-        if (isTrigger || !ACTION_CONFIG_COMPONENTS[item.id]) {
-            // If it's a trigger or an action with no extra config, select it immediately.
-            onSelect({ ...item, metadata: {} });
-        } else {
-            // It's an action that needs configuration, so go to the next step.
+        const lookupKey = getLookupKey(item);
+        if (isTrigger) {
+            // If it's a trigger and has a config component, open config; otherwise select immediately.
+            if (TRIGGER_CONFIG_COMPONENTS[lookupKey]) {
+                setSelectedItem(item);
+                setStep(1);
+            } else {
+                onSelect({ ...item, metadata: {} });
+            }
+            return;
+        }
+
+        // For actions, if a config component exists, open it; otherwise select immediately.
+        if (ACTION_CONFIG_COMPONENTS[lookupKey]) {
             setSelectedItem(item);
             setStep(1);
+        } else {
+            onSelect({ ...item, metadata: {} });
         }
     };
 
@@ -47,8 +72,12 @@ export function SelectionModal({ onSelect, availableItems = [], isTrigger }: Sel
         }
     };
     
-    // The component to render for action configuration.
-    const ConfigComponent = selectedItem ? ACTION_CONFIG_COMPONENTS[selectedItem.id] : null;
+    // The component to render for configuration (trigger or action).
+    const ConfigComponent = selectedItem
+        ? (isTrigger
+            ? TRIGGER_CONFIG_COMPONENTS[getLookupKey(selectedItem)]
+            : ACTION_CONFIG_COMPONENTS[getLookupKey(selectedItem)])
+        : null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
