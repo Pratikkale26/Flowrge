@@ -16,11 +16,11 @@ datasource db {
 
 
 model User {
-  id       Int    @id @default(autoincrement())
-  name     String
-  email    String
-  password String
-  zaps     Zap[]
+  id        Int    @id @default(autoincrement())
+  name      String?
+  email     String?
+  publicKey String  @default("") @unique
+  zaps      Zap[]
 }
 
 model Zap {

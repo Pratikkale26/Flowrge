@@ -1,76 +1,44 @@
-import { SigninSchema, SignupSchema } from "common/common";
+
 import { prisma } from "db/prisma";
 import { Router } from "express";
 import jwt from "jsonwebtoken"
 import { authMiddleware } from "../middlewares/middleware";
+import { PublicKey } from "@solana/web3.js";
+import nacl from "tweetnacl";
 
 const router = Router();
 
-router.post("/signup", async (req, res) => {
-    const body = req.body;
-    const parsedData = SignupSchema.safeParse(body);
-
-    if (!parsedData.success) {
-        console.log(parsedData.error);
-        res.status(411).json({
-            message: "Incorrect inputs"
-        })
-        return;
-    }
-
-    const userExists = await prisma.user.findFirst({
-        where: {
-            email: parsedData.data.username
-        }
-    });
-
-    if (userExists) {
-        res.status(403).json({
-            message: "User already exists"
-        })
-        return;
-    }
-
-    await prisma.user.create({
-        data: {
-            email: parsedData.data.username,
-            // TODO: hash password
-            password: parsedData.data.password,
-            name: parsedData.data.name
-        }
-    })
-
-    // await sendEmail();
-    // TODO: change the signin via email magic link (no password required)
-
-    return res.json({
-        message: "Please verify your account by checking your email"
-    });
-
-})
-
 router.post("/signin", async (req, res) => {
-    const body = req.body;
-    const parsedData = SigninSchema.safeParse(body);
+    try {
+    const { publicKey, signature } = req.body;
 
-    if (!parsedData.success) {
-        return res.status(411).json({
-            message: "Incorrect inputs"
-        })
+    if (!publicKey || !signature) {
+      res.status(400).json({ message: "Missing publicKey or signature" });
+      return;
     }
 
-    const user = await prisma.user.findFirst({
-        where: {
-            email: parsedData.data.username,
-            password: parsedData.data.password
-        }
+    const message = new TextEncoder().encode("Sign in into Flowrge");
+
+    const isVerified = nacl.sign.detached.verify(
+      message,
+      new Uint8Array(signature.data),
+      new PublicKey(publicKey).toBytes()
+    );
+
+    if (!isVerified) {
+      res.status(401).json({ message: "Signature verification failed" });
+      return;
+    }
+
+    const user = await prisma.user.upsert({
+      where: {
+        publicKey: publicKey,
+      },
+      update: {},
+      create: {
+        publicKey: publicKey,
+      },
     });
-    
-    if (!user) {
-        return res.status(403).json({
-            message: "Sorry credentials are incorrect"
-        })
-    }
 
     // sign the jwt
     const token = jwt.sign({
@@ -80,6 +48,15 @@ router.post("/signin", async (req, res) => {
     res.json({
         token: token,
     });
+
+    res.status(200).json({ message: "Signed in successfully!" });
+    return;
+
+  } catch (err) {
+    console.error("Link wallet error:", err);
+    res.status(500).json({ message: "Internal server error" });
+    return;
+  }
 })
 
 router.get("/", authMiddleware, async (req, res) => {
@@ -90,7 +67,8 @@ router.get("/", authMiddleware, async (req, res) => {
         },
         select: {
             name: true,
-            email: true
+            email: true,
+            publicKey: true
         }
     });
 

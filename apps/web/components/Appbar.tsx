@@ -1,19 +1,23 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletDisconnectButton, WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { Zap, Loader2 } from "lucide-react";
+import { HiMenu, HiX } from "react-icons/hi";
 import { LinkButton } from "./buttons/LinkButton";
 import { PrimaryButton } from "./buttons/PrimaryButton";
-import { WalletDisconnectButton, WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useState, useEffect } from "react";
-import { HiMenu, HiX } from "react-icons/hi";
-import { Zap } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const Appbar = () => {
   const router = useRouter();
-  const { publicKey } = useWallet();
+  const { publicKey, signMessage } = useWallet();
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -23,51 +27,69 @@ export const Appbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsAuthenticated(false);
-    router.push("/login");
+    router.push("/");
+  };
+
+  const handleSignMessageAndSend = async () => {
+    if (!signMessage || !publicKey) return;
+    try {
+      setLoading(true);
+      const message = new TextEncoder().encode("Sign in into Flowrge");
+      const signature = await signMessage(message);
+
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/signin`, {
+        signature,
+        publicKey: publicKey.toBase58(),
+      });
+
+      if (res.status === 200) {
+        localStorage.setItem("token", res.data.token);
+        setIsAuthenticated(true);
+        router.push("/dashboard");
+      }
+    } catch (err) {
+      console.error("Sign-in failed", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const navLinks = isAuthenticated
-    ? [
-        { label: "Dashboard", onClick: () => router.push("/dashboard") },
-        // { label: "Docs", onClick: () => router.push("/docs") },
-        // { label: "Community", onClick: () => router.push("/community") },
-      ]
-    : [{ label: "About", onClick: () => {} }];
+    ? [{ label: "Dashboard", onClick: () => router.push("/dashboard") }]
+    : [{ label: "About", onClick: () => router.push("/about") }];
 
   return (
-    <header className="w-full bg-card/50 backdrop-blur-sm border-b border-border shadow-sm fixed top-0 z-50">
+    <header className="w-full bg-background/60 backdrop-blur-md border-b border-border fixed top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center h-16">
         {/* Logo */}
-        <div className="flex items-center space-x-2 group" onClick={ () => router.push("/")}>
-          <div className="w-8 h-8 bg-gradient-to-br from-[var(--neon-purple)] to-[var(--neon-blue)] rounded-lg flex items-center justify-center group-hover:scale-110 transition-all duration-300 group-hover:rotate-12">
+        <div
+          onClick={() => router.push("/")}
+          className="flex items-center gap-2 cursor-pointer group"
+        >
+          <div className="w-8 h-8 bg-gradient-to-br from-[var(--neon-purple)] to-[var(--neon-blue)] rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110">
             <Zap className="w-5 h-5 text-white group-hover:drop-shadow-glow" />
           </div>
-          <span className="text-xl font-bold text-balance group-hover:text-primary transition-colors">Flowrge</span>
+          <span className="text-lg font-semibold tracking-wide group-hover:text-primary transition-colors">
+            Flowrge
+          </span>
         </div>
 
-        {/* Desktop Navigation */}
+        {/* Desktop Nav */}
         <nav className="hidden sm:flex items-center gap-4">
-          {navLinks.map((link, idx) => (
-            <LinkButton key={idx} onClick={link.onClick}>
+          {navLinks.map((link) => (
+            <LinkButton key={link.label} onClick={link.onClick}>
               {link.label}
             </LinkButton>
           ))}
 
-          {!isAuthenticated && (
-            <>
-              <LinkButton onClick={() => router.push("/login")}>Login</LinkButton>
-              <PrimaryButton onClick={() => router.push("/signup")}>Sign Up</PrimaryButton>
-            </>
-          )}
-
-          {/* Logout button */}
-          {isAuthenticated && (
-            <PrimaryButton onClick={handleLogout}>
-              Logout
+          {!isAuthenticated && publicKey? (
+            <PrimaryButton onClick={handleSignMessageAndSend} disabled={loading}>
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Verify Wallet"}
             </PrimaryButton>
+          ) : (
+            <PrimaryButton onClick={handleLogout}>Logout</PrimaryButton>
           )}
 
-          {/* Wallet */}
           {publicKey ? (
             <WalletDisconnectButton className="!ml-4 !bg-destructive hover:!bg-destructive/90" />
           ) : (
@@ -76,70 +98,59 @@ export const Appbar = () => {
         </nav>
 
         {/* Mobile Menu Button */}
-        <div className="sm:hidden flex items-center">
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="p-2 rounded-md hover:bg-accent/10 transition-colors"
-          >
-            {menuOpen ? <HiX className="w-6 h-6" /> : <HiMenu className="w-6 h-6" />}
-          </button>
-        </div>
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="sm:hidden p-2 rounded-md hover:bg-accent/10 transition-colors"
+        >
+          {menuOpen ? <HiX className="w-6 h-6" /> : <HiMenu className="w-6 h-6" />}
+        </button>
       </div>
 
       {/* Mobile Menu */}
-      {menuOpen && (
-        <div className="sm:hidden bg-card/90 backdrop-blur-md border-t border-border w-full px-6 py-4 flex flex-col gap-4">
-          {navLinks.map((link, idx) => (
-            <LinkButton
-              key={idx}
-              onClick={() => {
-                link.onClick();
-                setMenuOpen(false);
-              }}
-            >
-              {link.label}
-            </LinkButton>
-          ))}
-
-          {!isAuthenticated && (
-            <>
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="sm:hidden bg-card/95 backdrop-blur-md border-t border-border w-full px-6 py-4 flex flex-col gap-4 shadow-lg"
+          >
+            {navLinks.map((link) => (
               <LinkButton
+                key={link.label}
                 onClick={() => {
-                  router.push("/login");
+                  link.onClick();
                   setMenuOpen(false);
                 }}
               >
-                Login
+                {link.label}
               </LinkButton>
+            ))}
+
+            {!isAuthenticated && publicKey ? (
+              <PrimaryButton onClick={handleSignMessageAndSend} disabled={loading}>
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Verify Wallet"}
+              </PrimaryButton>
+            ) : (
               <PrimaryButton
                 onClick={() => {
-                  router.push("/signup");
+                  handleLogout();
                   setMenuOpen(false);
                 }}
               >
-                Sign Up
+                Logout
               </PrimaryButton>
-            </>
-          )}
+            )}
 
-          {isAuthenticated && (
-            <PrimaryButton
-              onClick={() => {
-                handleLogout();
-                setMenuOpen(false);
-              }}
-            >
-              Logout
-            </PrimaryButton>
-          )}
-
-          {publicKey ? (
-            <WalletDisconnectButton className="!bg-destructive hover:!bg-destructive/90" />
-          ) : (
-            <WalletMultiButton className="!bg-primary hover:!bg-primary/90" />
-          )}
-        </div>
-      )}
+            {publicKey ? (
+              <WalletDisconnectButton className="!bg-destructive hover:!bg-destructive/90" />
+            ) : (
+              <WalletMultiButton className="!bg-primary hover:!bg-primary/90" />
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };

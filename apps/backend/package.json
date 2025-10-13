@@ -17,9 +17,10 @@
   "dependencies": {
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
+    "common": "*",
     "db": "*",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "common": "*"
+    "tweetnacl": "^1.0.3"
   }
 }
