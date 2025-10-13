@@ -32,6 +32,14 @@ async function main() {
             image: "https://media.istockphoto.com/id/1125279178/vector/mail-line-icon.jpg?s=612x612&w=0&k=20&c=NASq4hMg0b6UP9V0ru4kxL2-J114O3TaakI467Pzjzw="
         }
     })
+
+    await prisma.availableAction.create({
+        data: {
+            id: "x-post",
+            name: "Post on X",
+            image: "https://img.freepik.com/premium-vector/new-logo-twitter-2023-vector-elon-musk_982229-557.jpg?semt=ais_hybrid&w=740&q=80"
+        }
+    })
     
 }
 

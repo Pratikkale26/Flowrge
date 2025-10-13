@@ -1,10 +1,15 @@
 
 type EmailPayload = { email: string; subject:string; body: string };
 type SolPayload   = { address: string; amount: number };
+type XPostPayload = { 
+    content: string; 
+    connected: boolean;
+};
 
 type ParsedAction =
   | { type: 'email'; data: EmailPayload }
-  | { type: 'sol';   data: SolPayload };
+  | { type: 'sol';   data: SolPayload }
+  | { type: 'x-post'; data: XPostPayload };
 
 export function parseAction(action: {
   type: { id: string };
@@ -27,6 +32,15 @@ export function parseAction(action: {
         data: {
           address: action.metadata.address,
           amount: Number(action.metadata.amount),
+        },
+      };
+
+    case 'x-post':
+      return {
+        type: 'x-post',
+        data: {
+          content: action.metadata.content,
+          connected: action.metadata.connected,
         },
       };
 

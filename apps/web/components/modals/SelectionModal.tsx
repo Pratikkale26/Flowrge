@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { EmailSelector } from "../action-configs/EmailSelector";
 import { SolanaSelector as ActionSolanaSelector } from "../action-configs/SolanaSelector";
+import { XPostSelector } from "../action-configs/XPostSelector";
 import { SolanaSelector as TriggerSolanaSelector } from "../trigger-configs/SolanaSelector";
 
 interface AvailableItem {
@@ -25,6 +26,7 @@ interface SelectionModalProps {
 const ACTION_CONFIG_COMPONENTS: Record<string, React.FC<{ setMetadata: (params: any) => void }>> = {
     'email': EmailSelector,
     'sol': ActionSolanaSelector,
+    'x-post': XPostSelector,
 };
 
 // A map to associate trigger IDs with their specific configuration components.
@@ -41,6 +43,7 @@ export function SelectionModal({ onSelect, availableItems = [], isTrigger }: Sel
         const normalized = (item.name || "").trim().toLowerCase();
         if (normalized.includes("solana")) return "sol";
         if (normalized.includes("email")) return "email";
+        if (normalized.includes("post on x") || normalized.includes("x post")) return "x-post";
         return item.id; // fallback to id
     };
 

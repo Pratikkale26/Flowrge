@@ -4,6 +4,7 @@ import { TOPIC_NAME } from "common/common";
 import { parseAction } from "./utils/parser";
 import { sendEmail } from "./utils/email";
 import { sendSol } from "./utils/sendSol";
+import { sendXPost } from "./utils/sendXPost";
 
 const kafka = new Kafka({
   clientId: 'outbox-processor',
@@ -79,6 +80,20 @@ async function main() {
                     parsed.data.address, 
                     String(parsed.data.amount)
                 );
+            }
+
+            if(parsed.type === "x-post") {
+                console.log("Posting to X...");
+                try {
+                    await sendXPost({
+                        content: parsed.data.content,
+                        connected: parsed.data.connected,
+                        userId: zapRunDetails.zap.userId,
+                    });
+                    console.log("X post sent successfully");
+                } catch (error) {
+                    console.error("Failed to send X post:", error);
+                }
             }
 
             // stops the consumer for 500ms

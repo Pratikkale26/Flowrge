@@ -77,4 +77,41 @@ router.get("/", authMiddleware, async (req, res) => {
     });
 })
 
+router.post("/x/connect", authMiddleware, async (req, res) => {
+  try {
+    const { accessToken, refreshToken } = req.body;
+    const id = Number(req.id);
+
+    await prisma.user.update({
+        where: { id },
+        data: { xAccessToken: accessToken, xRefreshToken: refreshToken },
+    });
+
+    res.json({ message: "X account connected successfully" });
+    return;
+  } catch (e) {
+    console.error("X connect error:", e);
+    res.status(500).json({ message: "Internal server error" });
+    return;
+  }
+});
+
+router.post("/x/disconnect", authMiddleware, async (req, res) => {
+  try {
+    const id = Number(req.id);  
+
+    await prisma.user.update({
+        where: { id },
+        data: { xAccessToken: null, xRefreshToken: null },
+    });
+    
+    res.json({ message: "X account disconnected successfully" });
+    return;
+  } catch (e) {
+    console.error("X disconnect error:", e);
+    res.status(500).json({ message: "Internal server error" });
+    return;
+  }
+});
+
 export const userRouter = router;
