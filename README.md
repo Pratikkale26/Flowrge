@@ -67,6 +67,17 @@ Create complex workflows with our intuitive drag-and-drop interface. No coding r
 ### 📊 **Analytics & Monitoring**
 Track your flows' performance, monitor success rates, and get detailed logs of every execution.
 
+### 🔒 **Reliable Solana Transactions with Sanctum Gateway**
+Flowrge now uses **Sanctum Gateway** for all on-chain transactions, giving:
+
+- ⚡ **Near 100% reliability** – automatic retries and failure handling
+- 👀 **Full observability** – dashboard with status, confirmations, and metrics
+- 🧩 **On-chain & off-chain sync** – emails, webhooks, and SOL always aligned
+- 🔄 **Optimized delivery** – faster confirmations with smart RPC routing
+- 🛡️ **Secure & validated** – safe signing and replay protection
+
+With Gateway, Flowrge workflows are production-ready and consistent across both frontend and worker flows.
+
 ## Getting Started
 
 1. **Sign up** for early access
@@ -84,7 +95,7 @@ Flowrge is built as a modern, scalable platform with:
 - **Message Queue**: Kafka for handling flow executions asynchronously
 - **Workers**: Distributed processing for executing actions
 - **Webhooks**: Dedicated service for receiving external triggers
-- **Indexer**: For indexing on blockchain and monitoring onchain event
+- **Indexer**: For indexing on blockchain and monitoring on-chain events
 
 ## Early Access
 
