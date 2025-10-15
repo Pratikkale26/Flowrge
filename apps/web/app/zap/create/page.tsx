@@ -4,7 +4,7 @@ import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useState, useCallback } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 // Components
 import { ZapHeader } from "../../../components/zap/ZapHeader";
@@ -28,7 +28,7 @@ const PAYMENT_PUBKEY = "FkUQR7H6FoNA4buay4qfXeVoxe31hz92gpsz5vEwbv5B";
 export default function CreateZapPage() {
     const router = useRouter();
     const { availableActions, availableTriggers, isLoading, error } = useAvailableZapElements();
-    const { publicKey, sendTransaction, connected } = useWallet();
+    const { publicKey, signTransaction, connected } = useWallet();
 
     const [zapName, setZapName] = useState<string>("");
     const [selectedTrigger, setSelectedTrigger] = useState<SelectedTrigger | null>(null);
@@ -89,20 +89,97 @@ export default function CreateZapPage() {
 
         setIsProcessingPayment(true);
         try {
-            const connection = new Connection("https://api.devnet.solana.com");
-            const recipientPubkey = new PublicKey(PAYMENT_PUBKEY);
+            if (!signTransaction) {
+                throw new Error("Wallet does not support transaction signing.");
+            }
+
+            const recipientPublicKey = new PublicKey(PAYMENT_PUBKEY);
             const lamports = Math.floor(totalAmount * LAMPORTS_PER_SOL);
 
-            const transaction = new Transaction().add(
+            const unsignedTx = new Transaction();
+            unsignedTx.add(
                 SystemProgram.transfer({
                     fromPubkey: publicKey,
-                    toPubkey: recipientPubkey,
+                    toPubkey: recipientPublicKey,
                     lamports,
                 })
             );
+            unsignedTx.feePayer = publicKey;
+            // Placeholder blockhash; Gateway will replace it in buildGatewayTransaction
+            unsignedTx.recentBlockhash = "11111111111111111111111111111111";
 
-            const signature = await sendTransaction(transaction, connection);
-            await connection.confirmTransaction(signature, "confirmed");
+            const toBase64 = (bytes: Uint8Array) => {
+                let binary = "";
+                const len = bytes.byteLength;
+                for (let i = 0; i < len; i++) binary += String.fromCharCode(bytes[i] ?? 0);
+                // btoa expects binary string
+                return btoa(binary);
+            };
+
+            const fromBase64 = (b64: string): Uint8Array => {
+                const binary = atob(b64);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                return bytes;
+            };
+
+            const GATEWAY_PROXY = "/api/gateway";
+
+            const unsignedWireB64 = toBase64(
+                unsignedTx.serialize({ requireAllSignatures: false, verifySignatures: false })
+            );
+
+            const buildResponse = await fetch(GATEWAY_PROXY, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: "flowrge-build",
+                    jsonrpc: "2.0",
+                    method: "buildGatewayTransaction",
+                    params: [
+                        unsignedWireB64,
+                        {
+                            // We can pass options here if desired; using project defaults
+                        },
+                    ],
+                }),
+            });
+
+            if (!buildResponse.ok) {
+                throw new Error("Failed to build gateway transaction");
+            }
+
+            const buildJson = await buildResponse.json();
+            const encodedBuiltTx: string | undefined = buildJson?.result?.transaction;
+            if (!encodedBuiltTx) {
+                throw new Error("Gateway did not return a transaction to sign");
+            }
+
+            const txToSign = Transaction.from(fromBase64(encodedBuiltTx));
+            const signedTx = await signTransaction(txToSign);
+
+            const signedWireB64 = toBase64(signedTx.serialize());
+
+            const sendResponse = await fetch(GATEWAY_PROXY, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: "flowrge-send",
+                    jsonrpc: "2.0",
+                    method: "sendTransaction",
+                    params: [signedWireB64],
+                }),
+            });
+
+            if (!sendResponse.ok) {
+                throw new Error("Failed to send transaction via Gateway");
+            }
+
+            const sendJson = await sendResponse.json();
+            const signature = sendJson?.result;
+            if (!signature) {
+                throw new Error("Gateway did not return a signature");
+            }
 
             // Payment successful, now publish the zap
             await handlePublish();

@@ -87,7 +87,7 @@ export const Appbar = () => {
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Verify Wallet"}
             </PrimaryButton>
           ) : (
-            <PrimaryButton onClick={handleLogout}>Logout</PrimaryButton>
+            isAuthenticated && <PrimaryButton onClick={handleLogout}>Logout</PrimaryButton>
           )}
 
           {publicKey ? (

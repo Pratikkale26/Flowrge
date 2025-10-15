@@ -95,7 +95,7 @@ export default function ZapDetailPage() {
             <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="text-center">
                     <div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-muted-foreground">Loading zap details...</p>
+                    <p className="text-muted-foreground">Loading Flows details...</p>
                 </div>
             </div>
         );
@@ -110,8 +110,8 @@ export default function ZapDetailPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                         </svg>
                     </div>
-                    <h2 className="text-xl font-semibold text-foreground mb-2">Zap Not Found</h2>
-                    <p className="text-muted-foreground mb-4">{error || "The zap you're looking for doesn't exist."}</p>
+                    <h2 className="text-xl font-semibold text-foreground mb-2">Flows Not Found</h2>
+                    <p className="text-muted-foreground mb-4">{error || "The Flows you're looking for doesn't exist."}</p>
                     <PrimaryButton onClick={() => router.push("/dashboard")}>
                         Back to Dashboard
                     </PrimaryButton>
@@ -146,7 +146,7 @@ export default function ZapDetailPage() {
                                 </svg>
                             </button>
                             <div>
-                                <h1 className="text-2xl font-bold text-foreground">Zap Details</h1>
+                                <h1 className="text-2xl font-bold text-foreground">Flow Details</h1>
                                 <p className="text-lg text-muted-foreground">Name: {zap.name}</p>
                                 <p className="text-muted-foreground">ID: {zap.id}</p>
                             </div>
@@ -162,7 +162,7 @@ export default function ZapDetailPage() {
                                 {zap.status && zap.status.charAt(0).toUpperCase() + zap.status.slice(1)}
                             </div>
                             <PrimaryButton onClick={() => router.push("/zap/create")}>
-                                Edit Zap
+                                Edit Flow
                             </PrimaryButton>
                         </div>
                     </div>

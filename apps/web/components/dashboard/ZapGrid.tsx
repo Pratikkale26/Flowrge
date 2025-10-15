@@ -46,7 +46,7 @@ export function ZapGrid({ zaps, onEdit, onDelete, onDuplicate }: ZapGridProps) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">No Zaps Yet</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">No Flows Yet</h3>
                 <p className="text-muted-foreground mb-4">Create your first automated workflow to get started</p>
             </div>
         );
