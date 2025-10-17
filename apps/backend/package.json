@@ -20,6 +20,7 @@
     "common": "*",
     "db": "*",
     "express": "^5.1.0",
+    "helius-sdk": "^2.0.2",
     "jsonwebtoken": "^9.0.2",
     "tweetnacl": "^1.0.3"
   }

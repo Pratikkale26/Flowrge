@@ -2,6 +2,7 @@ import { ZapCreateSchema } from "common/common";
 import { prisma } from "db/prisma";
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/middleware";
+import { helius } from "..";
 
 const router = Router();
 
@@ -148,5 +149,57 @@ router.get("/:zapId/zaprun", authMiddleware, async (req, res) => {
         return res.status(500).json({ error: "Internal server error." });
     }
 });
+
+router.post("/:zapId/activate", authMiddleware, async (req, res) => {
+    const zapId = req.params.zapId;
+    const userId = Number(req.id);
+
+    const zapExists = await prisma.zap.findFirst({
+        where: { id: zapId, userId: userId },
+        include: {
+            trigger: true
+        }
+    });
+
+    if (!zapExists) {
+        return res.status(404).json({ error: "Flow not found." });
+    }
+
+    type AddressMetadata = {
+        address: string;
+        [key: string]: any;
+    };
+    const metadata = zapExists.trigger?.metadata;
+    let address: string | undefined = undefined;
+
+    if (metadata) {
+        const typedMetadata = metadata as AddressMetadata;
+
+        address = typedMetadata.address;
+        if (typeof address === 'string' && address.length > 0) {
+            console.log(`Solana Address: ${address}`);
+        }
+    }
+    
+    if (!address) {
+        return res.status(400).json({ error: "Trigger address not configured." });
+    }
+
+    try {
+        const assets = await helius.webhooks.create({
+            webhookURL: `https://artistic-marcelene-parodiable.ngrok-free.dev/hooks/catch/1/${zapId}`,
+            accountAddresses: [address],
+            transactionTypes: ["Any"],
+            webhookType: "enhancedDevnet",
+
+        })
+
+        return res.json({ assets });
+    } catch (e) {
+        console.error("Error activating Zap:", e);
+        return res.status(500).json({ error: "Internal server error." });
+    }
+});
+
 
 export const zapRouter = router;
