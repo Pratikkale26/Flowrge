@@ -153,6 +153,7 @@ router.get("/:zapId/zaprun", authMiddleware, async (req, res) => {
 router.post("/:zapId/activate", authMiddleware, async (req, res) => {
     const zapId = req.params.zapId;
     const userId = Number(req.id);
+    const HOOKS_BASE_URL = process.env.HOOKS_BASE_URL || "https://artistic-marcelene-parodiable.ngrok-free.dev";
 
     const zapExists = await prisma.zap.findFirst({
         where: { id: zapId, userId: userId },
@@ -187,11 +188,10 @@ router.post("/:zapId/activate", authMiddleware, async (req, res) => {
 
     try {
         const assets = await helius.webhooks.create({
-            webhookURL: `https://artistic-marcelene-parodiable.ngrok-free.dev/hooks/catch/1/${zapId}`,
+            webhookURL: `${HOOKS_BASE_URL}/hooks/catch/1/${zapId}`,
             accountAddresses: [address],
             transactionTypes: ["Any"],
-            webhookType: "enhancedDevnet",
-
+            webhookType: "rawDevnet",
         })
 
         return res.json({ assets });
