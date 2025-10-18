@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+// import { useSearchParams } from "next/navigation";
 
 export default function XCallbackPage() {
-    const searchParams = useSearchParams();
+    // const searchParams = useSearchParams();
+    if (typeof window === 'undefined') {
+            return;
+        }
+    const searchParams = new URLSearchParams(window.location.search);
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
     const [message, setMessage] = useState('');
-
+    
     useEffect(() => {
         const handleCallback = async () => {
             const code = searchParams.get('code');

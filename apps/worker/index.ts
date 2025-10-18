@@ -3,7 +3,7 @@ import { Kafka } from "kafkajs";
 import { TOPIC_NAME } from "common/common";
 import { parseAction } from "./utils/parser";
 import { sendEmail } from "./utils/email";
-import { sendSol } from "./utils/sendSol";
+import { sendSol } from "./utils/sendSol1";
 import { sendXPost } from "./utils/sendXPost";
 
 const kafka = new Kafka({
