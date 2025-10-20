@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import { useRouter } from "next/navigation";
 import { LinkButton } from "../buttons/LinkButton";
 
@@ -42,6 +43,21 @@ interface ZapCardProps {
 export function ZapCard({ zap, onEdit, onDelete, onDuplicate }: ZapCardProps) {
   const router = useRouter();
   const [showActions, setShowActions] = useState(false);
+  const [activating, setActivating] = useState(false);
+  const [loadingSub, setLoadingSub] = useState(false);
+  const [matchedSubId, setMatchedSubId] = useState<string | null>(null);
+  const apiBase = process.env.NEXT_PUBLIC_BACKEND_URL;
+  const token = useMemo(() => (typeof window !== "undefined" ? localStorage.getItem("token") : null), []);
+  const triggerAddress = useMemo(() => {
+    try {
+      // backend should return trigger.metadata with address
+      const anyTrigger: any = zap?.trigger as any;
+      const addr = anyTrigger?.metadata?.address;
+      return typeof addr === "string" && addr.length > 0 ? addr : undefined;
+    } catch {
+      return undefined;
+    }
+  }, [zap?.trigger]);
 
   const handleGoToZap = () => {
     router.push(`/zap/${zap.id}`);
@@ -53,6 +69,78 @@ export function ZapCard({ zap, onEdit, onDelete, onDuplicate }: ZapCardProps) {
       month: "short",
       day: "numeric",
     });
+
+  const isSolanaTrigger = () => {
+    const name = (zap?.trigger?.type?.name || "").toLowerCase();
+    return name.includes("sol") || name.includes("solana");
+  };
+
+  const loadMatchingSubscription = async () => {
+    if (!apiBase || !token || !triggerAddress) return;
+    setLoadingSub(true);
+    try {
+      const res = await axios.get(`${apiBase}/api/v1/zerion/subscriptions`, { headers: { Authorization: `Bearer ${token}` } });
+      const list: any[] = res.data?.data || [];
+      const match = list.find((s) => {
+        const cb: string = s.callbackUrl || s.callback_url || "";
+        const addr: string = s.walletAddress || s.address || "";
+        const chain: string = (s.chainId || s.chain_id || "").toLowerCase();
+        return cb.endsWith(`/${zap.id}`) && addr.toLowerCase() === triggerAddress.toLowerCase() && chain.includes("solana");
+      });
+      setMatchedSubId(match?.subscriptionId || null);
+    } catch (e) {
+      // ignore
+    } finally {
+      setLoadingSub(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isSolanaTrigger() && triggerAddress) {
+      loadMatchingSubscription();
+    } else {
+      setMatchedSubId(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [triggerAddress, zap.id]);
+
+  const activateOnChain = async () => {
+    if (!apiBase || !token) return;
+    if (!triggerAddress) { alert("Trigger address missing in this flow"); return; }
+    setActivating(true);
+    try {
+      await axios.post(
+        `${apiBase}/api/v1/zerion/subscriptions`,
+        {
+          walletAddress: triggerAddress,
+          chainId: "solana",
+          zapId: zap.id,
+          callbackUrl: undefined,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("On-chain trigger activated successfully");
+      await loadMatchingSubscription();
+    } catch (e: any) {
+      alert(e?.response?.data?.error || e.message || "Activation failed");
+    } finally {
+      setActivating(false);
+    }
+  };
+
+  const deactivateOnChain = async () => {
+    if (!apiBase || !token || !matchedSubId) return;
+    setActivating(true);
+    try {
+      await axios.delete(`${apiBase}/api/v1/zerion/subscriptions/${matchedSubId}`, { headers: { Authorization: `Bearer ${token}` } });
+      alert("On-chain trigger deactivated");
+      setMatchedSubId(null);
+    } catch (e: any) {
+      alert(e?.response?.data?.error || e.message || "Deactivation failed");
+    } finally {
+      setActivating(false);
+    }
+  };
 
   return (
     <div className="relative bg-[#111111]/90 border border-zinc-800 rounded-2xl p-5 hover:bg-[#181818] hover:shadow-lg hover:shadow-black/20 transition-all duration-200">
@@ -105,6 +193,30 @@ export function ZapCard({ zap, onEdit, onDelete, onDuplicate }: ZapCardProps) {
             {`${process.env.NEXT_PUBLIC_HOOKS_URL}/hooks/catch/1/${zap.id}`}
           </code>
         </div>
+
+        {isSolanaTrigger() && (
+          <div className="rounded-lg p-3 border border-emerald-900/40 bg-emerald-900/10">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-emerald-300">Solana trigger detected</p>
+                <p className="text-xs text-emerald-500">{loadingSub ? "Checking status..." : matchedSubId ? "Subscription active" : (triggerAddress ? "Activate on-chain subscription to start receiving events." : "Configure a wallet address in the trigger to activate.")}</p>
+              </div>
+              {matchedSubId ? (
+                <button
+                  onClick={deactivateOnChain}
+                  disabled={activating}
+                  className="text-sm rounded-md px-3 py-2 bg-rose-600 text-white disabled:opacity-60"
+                >{activating ? "Deactivating..." : "Deactivate"}</button>
+              ) : (
+                <button
+                  onClick={activateOnChain}
+                  disabled={activating || !triggerAddress}
+                  className="text-sm rounded-md px-3 py-2 bg-emerald-600 text-white disabled:opacity-60"
+                >{activating ? "Activating..." : (triggerAddress ? "Activate On-chain Trigger" : "Add Trigger Address")}</button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Footer Actions */}
