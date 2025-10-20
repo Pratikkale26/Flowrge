@@ -78,6 +78,18 @@ Flowrge now uses **Sanctum Gateway** for all on-chain transactions, giving:
 
 With Gateway, Flowrge workflows are production-ready and consistent across both frontend and worker flows.
 
+### 🔔 **Zerion Integration for Real-Time Wallet Tracking**  
+
+Flowrge now supports **Zerion API subscriptions**, letting you track wallet activity in real time:  
+
+- Create, list, fetch, and delete wallet subscriptions effortlessly  
+- Receive instant updates when a wallet sends or receives SOL or tokens  
+- Sync subscription status automatically in the dashboard  
+- Trigger Web2/web3 actions or on-chain flows based on wallet events  
+
+This upgrade replaces our previous Helius integration, giving **more reliable, cross-chain tracking** and smoother real-time automation for your flows.  
+
+
 ## Getting Started
 
 1. **Sign up** for early access
