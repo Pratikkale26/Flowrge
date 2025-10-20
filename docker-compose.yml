@@ -1,0 +1,110 @@
+version: "3.9"
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    env_file:
+      - .env
+    environment:
+      PORT: 3001
+      KAFKA_BROKERS: kafka:9092
+    depends_on:
+      - kafka
+    ports:
+      - "3001:3001"
+    working_dir: /app/apps/backend
+
+  hooks:
+    build:
+      context: .
+      dockerfile: apps/hooks/Dockerfile
+    env_file:
+      - .env
+    environment:
+      PORT: 3002
+      KAFKA_BROKERS: kafka:9092
+    depends_on:
+      - kafka
+    ports:
+      - "3002:3002"
+    working_dir: /app/apps/hooks
+
+  processor:
+    build:
+      context: .
+      dockerfile: apps/processor/Dockerfile
+    env_file:
+      - .env
+    environment:
+      KAFKA_BROKERS: kafka:9092
+    depends_on:
+      - kafka
+    working_dir: /app/apps/processor
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    env_file:
+      - .env
+    environment:
+      KAFKA_BROKERS: kafka:9092
+    depends_on:
+      - kafka
+    working_dir: /app/apps/worker
+
+  # indexer:
+  #   build:
+  #     context: .
+  #     dockerfile: apps/indexer/Dockerfile
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     KAFKA_BROKERS: kafka:9092
+  #   depends_on:
+  #     - kafka
+  #   working_dir: /app/apps/indexer
+
+  # web:
+  #   build:
+  #     context: .
+  #     dockerfile: apps/web/Dockerfile
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     NEXT_PUBLIC_API_BASE_URL: http://backend:3001
+  #     PORT: 3000
+  #   depends_on:
+  #     - backend
+  #   ports:
+  #     - "3000:3000"
+  #   working_dir: /app/apps/web
+
+networks:
+  default:
+    driver: bridge
+
+
