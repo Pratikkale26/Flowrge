@@ -72,6 +72,7 @@ async function main() {
                     subject: parsed.data.subject,
                     text: parsed.data.body
                 })
+                console.log("Email sent successfully");
             }
 
             if(parsed.type === "sol") {
@@ -80,6 +81,7 @@ async function main() {
                     parsed.data.address, 
                     String(parsed.data.amount)
                 );
+                console.log("SOL sent successfully");
             }
 
             if(parsed.type === "x-post") {
