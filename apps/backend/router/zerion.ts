@@ -12,7 +12,7 @@ if (!ZERION_API_KEY) {
 }
 
 // Helper function to make authenticated requests to Zerion API
-const zerionRequest = async (method: 'get' | 'post' | 'delete', endpoint: string, data?: any) => {
+const zerionRequest = async (method: 'get' | 'post' | 'delete' | 'patch', endpoint: string, data?: any) => {
   if (!ZERION_API_KEY) {
     throw new Error("Zerion API key is not configured");
   }
@@ -57,7 +57,7 @@ zerionRouter.post("/subscriptions", authMiddleware, async (req, res) => {
         walletAddress,
         chainId,
         callbackUrl: response.data.attributes.callback_url,
-        isActive: true
+        isActive: false
       }
     });
 
@@ -210,6 +210,100 @@ zerionRouter.delete("/subscriptions/:subscriptionId", authMiddleware, async (req
       }
     }
 
+    res.status(500).json({
+      success: false,
+      error: error.response?.data?.error || error.message
+    });
+  }
+});
+
+// Enable a subscription
+zerionRouter.patch("/subscriptions/:subscriptionId/enable", authMiddleware, async (req, res) => {
+  try {
+    const { subscriptionId } = req.params;
+    const userId = req.id;
+
+    // First check if the subscription exists and belongs to the user
+    const subscription = await prisma.zerionSubscription.findFirst({
+      where: {
+        subscriptionId,
+        userId: Number(userId)
+      }
+    });
+
+    if (!subscription) {
+      return res.status(404).json({
+        success: false,
+        error: "Subscription not found or access denied"
+      });
+    }
+
+    // Enable the subscription in Zerion
+    const response = await zerionRequest('patch', `tx-subscriptions/${subscriptionId}/enable`);
+    
+    // Update our database
+    await prisma.zerionSubscription.update({
+      where: { id: subscription.id },
+      data: { 
+        isActive: true,
+        updatedAt: new Date()
+      }
+    });
+
+    res.json({
+      success: true,
+      data: response.data,
+      message: "Subscription enabled successfully"
+    });
+  } catch (error: any) {
+    console.error("Error enabling Zerion subscription:", error);
+    res.status(500).json({
+      success: false,
+      error: error.response?.data?.error || error.message
+    });
+  }
+});
+
+// Disable a subscription
+zerionRouter.patch("/subscriptions/:subscriptionId/disable", authMiddleware, async (req, res) => {
+  try {
+    const { subscriptionId } = req.params;
+    const userId = req.id;
+
+    // First check if the subscription exists and belongs to the user
+    const subscription = await prisma.zerionSubscription.findFirst({
+      where: {
+        subscriptionId,
+        userId: Number(userId)
+      }
+    });
+
+    if (!subscription) {
+      return res.status(404).json({
+        success: false,
+        error: "Subscription not found or access denied"
+      });
+    }
+
+    // Disable the subscription in Zerion
+    const response = await zerionRequest('patch', `tx-subscriptions/${subscriptionId}/disable`);
+    
+    // Update our database
+    await prisma.zerionSubscription.update({
+      where: { id: subscription.id },
+      data: { 
+        isActive: false,
+        updatedAt: new Date()
+      }
+    });
+
+    res.json({
+      success: true,
+      data: response.data,
+      message: "Subscription disabled successfully"
+    });
+  } catch (error: any) {
+    console.error("Error disabling Zerion subscription:", error);
     res.status(500).json({
       success: false,
       error: error.response?.data?.error || error.message

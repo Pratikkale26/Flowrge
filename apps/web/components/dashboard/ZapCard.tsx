@@ -42,10 +42,12 @@ interface ZapCardProps {
 
 export function ZapCard({ zap, onEdit, onDelete, onDuplicate }: ZapCardProps) {
   const router = useRouter();
+  const userId = zap.userId;
   const [showActions, setShowActions] = useState(false);
   const [activating, setActivating] = useState(false);
   const [loadingSub, setLoadingSub] = useState(false);
   const [matchedSubId, setMatchedSubId] = useState<string | null>(null);
+  const [isActiveSub, setIsActiveSub] = useState<boolean | null>(null);
   const apiBase = process.env.NEXT_PUBLIC_BACKEND_URL;
   const token = useMemo(() => (typeof window !== "undefined" ? localStorage.getItem("token") : null), []);
   const triggerAddress = useMemo(() => {
@@ -88,6 +90,7 @@ export function ZapCard({ zap, onEdit, onDelete, onDuplicate }: ZapCardProps) {
         return cb.endsWith(`/${zap.id}`) && addr.toLowerCase() === triggerAddress.toLowerCase() && chain.includes("solana");
       });
       setMatchedSubId(match?.subscriptionId || null);
+      setIsActiveSub(typeof match?.isActive === "boolean" ? !!match.isActive : null);
     } catch (e) {
       // ignore
     } finally {
@@ -100,6 +103,7 @@ export function ZapCard({ zap, onEdit, onDelete, onDuplicate }: ZapCardProps) {
       loadMatchingSubscription();
     } else {
       setMatchedSubId(null);
+      setIsActiveSub(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [triggerAddress, zap.id]);
@@ -119,7 +123,7 @@ export function ZapCard({ zap, onEdit, onDelete, onDuplicate }: ZapCardProps) {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert("On-chain trigger activated successfully");
+      alert("Subscription created. You can enable it to start receiving events.");
       await loadMatchingSubscription();
     } catch (e: any) {
       alert(e?.response?.data?.error || e.message || "Activation failed");
@@ -137,6 +141,36 @@ export function ZapCard({ zap, onEdit, onDelete, onDuplicate }: ZapCardProps) {
       setMatchedSubId(null);
     } catch (e: any) {
       alert(e?.response?.data?.error || e.message || "Deactivation failed");
+    } finally {
+      setActivating(false);
+    }
+  };
+
+  const enableSubscription = async () => {
+    if (!apiBase || !token || !matchedSubId) return;
+    setActivating(true);
+    try {
+      await axios.patch(`${apiBase}/api/v1/zerion/subscriptions/${matchedSubId}/enable`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      alert("Subscription enabled successfully");
+      setIsActiveSub(true);
+      await loadMatchingSubscription();
+    } catch (e: any) {
+      alert(e?.response?.data?.error || e.message || "Enable failed");
+    } finally {
+      setActivating(false);
+    }
+  };
+
+  const disableSubscription = async () => {
+    if (!apiBase || !token || !matchedSubId) return;
+    setActivating(true);
+    try {
+      await axios.patch(`${apiBase}/api/v1/zerion/subscriptions/${matchedSubId}/disable`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      alert("Subscription disabled successfully");
+      setIsActiveSub(false);
+      await loadMatchingSubscription();
+    } catch (e: any) {
+      alert(e?.response?.data?.error || e.message || "Disable failed");
     } finally {
       setActivating(false);
     }
@@ -190,7 +224,7 @@ export function ZapCard({ zap, onEdit, onDelete, onDuplicate }: ZapCardProps) {
         <div className="bg-zinc-900/70 rounded-lg p-3 border border-zinc-800">
           <p className="text-xs text-zinc-500 mb-1">Webhook URL</p>
           <code className="text-xs text-zinc-200 break-all">
-            {`${process.env.NEXT_PUBLIC_HOOKS_URL}/hooks/catch/1/${zap.id}`}
+            {`${process.env.NEXT_PUBLIC_HOOKS_URL}/hooks/catch/${userId}/${zap.id}`}
           </code>
         </div>
 
@@ -199,20 +233,41 @@ export function ZapCard({ zap, onEdit, onDelete, onDuplicate }: ZapCardProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-emerald-300">Solana trigger detected</p>
-                <p className="text-xs text-emerald-500">{loadingSub ? "Checking status..." : matchedSubId ? "Subscription active" : (triggerAddress ? "Activate on-chain subscription to start receiving events." : "Configure a wallet address in the trigger to activate.")}</p>
+                <p className="text-xs text-emerald-500">{
+                  loadingSub
+                    ? "Checking status..."
+                    : matchedSubId
+                      ? (isActiveSub ? "Subscription active" : "Subscription disabled")
+                      : (triggerAddress ? "Create a subscription for this wallet to manage on-chain events." : "Configure a wallet address in the trigger to proceed.")
+                }</p>
               </div>
               {matchedSubId ? (
-                <button
-                  onClick={deactivateOnChain}
-                  disabled={activating}
-                  className="text-sm rounded-md px-3 py-2 bg-rose-600 text-white disabled:opacity-60"
-                >{activating ? "Deactivating..." : "Deactivate"}</button>
+                <div className="flex space-x-2">
+                  {isActiveSub ? (
+                    <button
+                      onClick={disableSubscription}
+                      disabled={activating}
+                      className="text-sm rounded-md px-3 py-2 bg-orange-600 text-white disabled:opacity-60"
+                    >{activating ? "Disabling..." : "Disable"}</button>
+                  ) : (
+                    <button
+                      onClick={enableSubscription}
+                      disabled={activating}
+                      className="text-sm rounded-md px-3 py-2 bg-blue-600 text-white disabled:opacity-60"
+                    >{activating ? "Enabling..." : "Enable"}</button>
+                  )}
+                  <button
+                    onClick={deactivateOnChain}
+                    disabled={activating}
+                    className="text-sm rounded-md px-3 py-2 bg-rose-600 text-white disabled:opacity-60"
+                  >{activating ? "Deleting..." : "Delete"}</button>
+                </div>
               ) : (
                 <button
                   onClick={activateOnChain}
                   disabled={activating || !triggerAddress}
                   className="text-sm rounded-md px-3 py-2 bg-emerald-600 text-white disabled:opacity-60"
-                >{activating ? "Activating..." : (triggerAddress ? "Activate On-chain Trigger" : "Add Trigger Address")}</button>
+                >{activating ? "Creating..." : (triggerAddress ? "Create subscription" : "Add Trigger Address")}</button>
               )}
             </div>
           </div>
