@@ -22,6 +22,9 @@ model User {
   publicKey       String  @default("") @unique
   xAccessToken    String?
   xRefreshToken   String?
+  emailAccessToken    String?
+  emailRefreshToken   String?
+  emailProvider   String? // 'gmail', 'outlook', etc.
   zaps            Zap[]
   zerionSubscriptions ZerionSubscription[]
 }

@@ -70,7 +70,10 @@ async function main() {
                 await sendEmail({
                     to: parsed.data.email,
                     subject: parsed.data.subject,
-                    text: parsed.data.body
+                    text: parsed.data.body,
+                    connected: parsed.data.connected,
+                    provider: parsed.data.provider,
+                    userId: zapRunDetails.zap.userId
                 })
                 console.log("Email sent successfully");
             }

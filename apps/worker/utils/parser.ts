@@ -1,5 +1,11 @@
 
-type EmailPayload = { email: string; subject:string; body: string };
+type EmailPayload = { 
+    email: string; 
+    subject: string; 
+    body: string; 
+    connected: boolean;
+    provider?: string;
+};
 type SolPayload   = { address: string; amount: number };
 type XPostPayload = { 
     content: string; 
@@ -23,6 +29,8 @@ export function parseAction(action: {
           email: action.metadata.email,
           subject: action.metadata.subject,
           body: action.metadata.body,
+          connected: action.metadata.connected || false,
+          provider: action.metadata.provider,
         },
       };
 

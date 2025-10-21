@@ -68,7 +68,10 @@ router.get("/", authMiddleware, async (req, res) => {
         select: {
             name: true,
             email: true,
-            publicKey: true
+            publicKey: true,
+            emailAccessToken: true,
+            emailRefreshToken: true,
+            emailProvider: true,
         }
     });
 
@@ -109,6 +112,51 @@ router.post("/x/disconnect", authMiddleware, async (req, res) => {
     return;
   } catch (e) {
     console.error("X disconnect error:", e);
+    res.status(500).json({ message: "Internal server error" });
+    return;
+  }
+});
+
+router.post("/email/connect", authMiddleware, async (req, res) => {
+  try {
+    const { accessToken, refreshToken, provider } = req.body;
+    const id = Number(req.id);
+
+    await prisma.user.update({
+        where: { id },
+        data: { 
+          emailAccessToken: accessToken, 
+          emailRefreshToken: refreshToken,
+          emailProvider: provider 
+        },
+    });
+
+    res.json({ message: "Email account connected successfully" });
+    return;
+  } catch (e) {
+    console.error("Email connect error:", e);
+    res.status(500).json({ message: "Internal server error" });
+    return;
+  }
+});
+
+router.post("/email/disconnect", authMiddleware, async (req, res) => {
+  try {
+    const id = Number(req.id);  
+
+    await prisma.user.update({
+        where: { id },
+        data: { 
+          emailAccessToken: null, 
+          emailRefreshToken: null,
+          emailProvider: null 
+        },
+    });
+    
+    res.json({ message: "Email account disconnected successfully" });
+    return;
+  } catch (e) {
+    console.error("Email disconnect error:", e);
     res.status(500).json({ message: "Internal server error" });
     return;
   }
