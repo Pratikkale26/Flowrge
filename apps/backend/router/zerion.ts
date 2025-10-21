@@ -42,7 +42,7 @@ zerionRouter.post("/subscriptions", authMiddleware, async (req, res) => {
     }
 
     const response = await zerionRequest('post', 'tx-subscriptions', {
-      callback_url: callbackUrl || `${process.env.APP_URL}/catch/1/${zapId}`,
+      callback_url: callbackUrl || `${process.env.APP_URL}/catch/${userId}/${zapId}`,
       addresses: [walletAddress],
       chain_ids: [chainId]
     });
