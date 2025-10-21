@@ -153,7 +153,8 @@ router.get("/:zapId/zaprun", authMiddleware, async (req, res) => {
 router.post("/:zapId/activate", authMiddleware, async (req, res) => {
     const zapId = req.params.zapId;
     const userId = Number(req.id);
-    const HOOKS_BASE_URL = process.env.HOOKS_BASE_URL || "https://artistic-marcelene-parodiable.ngrok-free.dev";
+    const HOOKS_BASE_URL = process.env.WEBHOOKS_URL || "https://artistic-marcelene-parodiable.ngrok-free.dev";
+    const callbackUrl = `${HOOKS_BASE_URL}/hooks/catch/${userId}/${zapId}`;
 
     const zapExists = await prisma.zap.findFirst({
         where: { id: zapId, userId: userId },
@@ -187,17 +188,156 @@ router.post("/:zapId/activate", authMiddleware, async (req, res) => {
     }
 
     try {
-        const assets = await helius.webhooks.create({
-            webhookURL: `${HOOKS_BASE_URL}/hooks/catch/1/${zapId}`,
+        const webhook = await helius.webhooks.create({
+            webhookURL: callbackUrl,
             accountAddresses: [address],
             transactionTypes: ["Any"],
             webhookType: "rawDevnet",
-        })
+        });
+        console.log(webhook);
 
-        return res.json({ assets });
+        // Store the webhook in the database
+        const created = await prisma.zerionSubscription.create({
+            data: {
+                subscriptionId: webhook.webhookID,
+                userId: userId,
+                zapId: zapId,
+                walletAddress: address,
+                chainId: "solana",
+                callbackUrl: callbackUrl,
+                isActive: true
+            }
+        });
+        
+
+        return res.json({ 
+            success: true,
+            data: {
+                id: created.id,
+                subscriptionId: created.subscriptionId,
+                zapId: created.zapId,
+                walletAddress: created.walletAddress,
+                chainId: created.chainId,
+                callbackUrl: created.callbackUrl,
+                isActive: created.isActive
+            }
+        });
     } catch (e) {
         console.error("Error activating Zap:", e);
         return res.status(500).json({ error: "Internal server error." });
+    }
+});
+
+// Get webhook status for a zap
+router.get("/:zapId/webhook", authMiddleware, async (req, res) => {
+    const zapId = req.params.zapId;
+    const userId = Number(req.id);
+
+    try {
+        const subscription = await prisma.zerionSubscription.findFirst({
+            where: {
+                zapId: zapId,
+                userId: userId
+            }
+        });
+
+        if (!subscription) {
+            return res.json({
+                success: true,
+                data: null
+            });
+        }
+
+        // Get the latest status from Helius
+        try {
+            const webhook = await helius.webhooks.get(subscription.subscriptionId);
+            
+            return res.json({
+                success: true,
+                data: {
+                    ...subscription,
+                    isActive: webhook.webhookURL ? true : false
+                }
+            });
+        } catch (error: any) {
+            // If we can't reach Helius (404 or other errors), just return the local data
+            console.log("Helius webhook not found or error, using local data:", error.message);
+            await prisma.zerionSubscription.update({
+                where: { id: subscription.id },
+                data: { isActive: false, updatedAt: new Date() }
+            });
+            return res.json({
+                success: true,
+                data: { ...subscription, isActive: false }
+            });
+        }
+    } catch (error: any) {
+        console.error("Error getting webhook status:", error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Delete webhook for a zap
+router.delete("/:zapId/webhook", authMiddleware, async (req, res) => {
+    const zapId = req.params.zapId;
+    const userId = Number(req.id);
+
+    try {
+        const subscription = await prisma.zerionSubscription.findFirst({
+            where: {
+                zapId: zapId,
+                userId: userId
+            }
+        });
+
+        if (!subscription) {
+            return res.status(404).json({
+                success: false,
+                error: "Webhook not found or access denied"
+            });
+        }
+
+        // Try to delete from Helius, but don't fail if it's already gone
+        try {
+            await helius.webhooks.delete(subscription.subscriptionId);
+            console.log("Webhook deleted from Helius successfully");
+        } catch (heliusError: any) {
+            console.log("Helius webhook deletion failed (may already be deleted):", heliusError.message);
+            // Continue with local deletion even if Helius fails
+        }
+        
+        // Always delete from our database
+        await prisma.zerionSubscription.delete({
+            where: { id: subscription.id }
+        });
+
+        res.json({
+            success: true,
+            message: "Webhook deleted successfully"
+        });
+    } catch (error: any) {
+        console.error("Error deleting webhook:", error);
+        
+        // If there's any error, still try to clean up local database
+        try {
+            await prisma.zerionSubscription.deleteMany({
+                where: { zapId: zapId, userId: userId }
+            });
+            return res.json({
+                success: true,
+                message: "Webhook removed from local database"
+            });
+        } catch (dbError) {
+            console.error("Error cleaning up webhook:", dbError);
+        }
+
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
     }
 });
 

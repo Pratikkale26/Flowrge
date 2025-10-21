@@ -1,6 +1,6 @@
 "use client";
 
-import { ZapCard } from "./ZapCard";
+import { ZapCard } from "./ZapCard1";
 
 interface Zap {
     "id": string,
