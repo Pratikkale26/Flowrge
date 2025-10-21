@@ -6,6 +6,7 @@ app.use(express.json());
 
 // password logic 
 app.post("/hooks/catch/:userId/:zapId", async (req, res) => {
+    console.log("Received webhook", req.params, req.body);
     const userId = req.params.userId;
     const zapId = req.params.zapId;
     const body = req.body;
