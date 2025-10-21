@@ -89,6 +89,7 @@ model ZerionSubscription {
   id              String    @id @default(uuid())
   subscriptionId  String    @unique
   userId          Int
+  zapId           String?
   walletAddress   String
   chainId         String    @default("solana")
   callbackUrl     String
@@ -100,4 +101,5 @@ model ZerionSubscription {
   @@index([userId])
   @@index([walletAddress])
   @@index([subscriptionId])
+  @@index([zapId])
 }

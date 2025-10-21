@@ -84,10 +84,10 @@ export function ZapCard({ zap, onEdit, onDelete, onDuplicate }: ZapCardProps) {
       const res = await axios.get(`${apiBase}/api/v1/zerion/subscriptions`, { headers: { Authorization: `Bearer ${token}` } });
       const list: any[] = res.data?.data || [];
       const match = list.find((s) => {
-        const cb: string = s.callbackUrl || s.callback_url || "";
+        const zapIdMatch = s.zapId === zap.id;
         const addr: string = s.walletAddress || s.address || "";
         const chain: string = (s.chainId || s.chain_id || "").toLowerCase();
-        return cb.endsWith(`/${zap.id}`) && addr.toLowerCase() === triggerAddress.toLowerCase() && chain.includes("solana");
+        return zapIdMatch && addr.toLowerCase() === triggerAddress.toLowerCase() && chain.includes("solana");
       });
       setMatchedSubId(match?.subscriptionId || null);
       setIsActiveSub(typeof match?.isActive === "boolean" ? !!match.isActive : null);
@@ -113,7 +113,7 @@ export function ZapCard({ zap, onEdit, onDelete, onDuplicate }: ZapCardProps) {
     if (!triggerAddress) { alert("Trigger address missing in this flow"); return; }
     setActivating(true);
     try {
-      await axios.post(
+      const res = await axios.post(
         `${apiBase}/api/v1/zerion/subscriptions`,
         {
           walletAddress: triggerAddress,
@@ -123,8 +123,12 @@ export function ZapCard({ zap, onEdit, onDelete, onDuplicate }: ZapCardProps) {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      const created = res.data?.data;
+      if (created?.subscriptionId) {
+        setMatchedSubId(created.subscriptionId);
+        setIsActiveSub(!!created.isActive);
+      }
       alert("Subscription created. You can enable it to start receiving events.");
-      await loadMatchingSubscription();
     } catch (e: any) {
       alert(e?.response?.data?.error || e.message || "Activation failed");
     } finally {

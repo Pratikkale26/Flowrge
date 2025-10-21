@@ -41,8 +41,10 @@ zerionRouter.post("/subscriptions", authMiddleware, async (req, res) => {
       return res.status(400).json({ error: "Wallet address is required" });
     }
 
+    const webhookBase = process.env.WEBHOOKS_URL || "";
+    const desiredCallback = callbackUrl || `${webhookBase}/hooks/catch/${userId}/${zapId}`;
     const response = await zerionRequest('post', 'tx-subscriptions', {
-      callback_url: callbackUrl || `${process.env.APP_URL}/catch/${userId}/${zapId}`,
+      callback_url: desiredCallback,
       addresses: [walletAddress],
       chain_ids: [chainId]
     });
@@ -50,20 +52,29 @@ zerionRouter.post("/subscriptions", authMiddleware, async (req, res) => {
     console.log(response.data);
 
     // Store the subscription in the database
-    await prisma.zerionSubscription.create({
+    const created = await prisma.zerionSubscription.create({
       data: {
         subscriptionId: response.data.id,
         userId: Number(userId),
+        zapId: zapId,
         walletAddress,
         chainId,
-        callbackUrl: response.data.attributes.callback_url,
+        callbackUrl: response.data?.attributes?.callback_url || desiredCallback,
         isActive: false
       }
     });
 
     res.json({
       success: true,
-      data: response.data
+      data: {
+        id: created.id,
+        subscriptionId: created.subscriptionId,
+        zapId: created.zapId,
+        walletAddress: created.walletAddress,
+        chainId: created.chainId,
+        callbackUrl: created.callbackUrl,
+        isActive: created.isActive
+      }
     });
   } catch (error: any) {
     console.error("Error creating Zerion subscription:", error);
@@ -187,6 +198,7 @@ zerionRouter.delete("/subscriptions/:subscriptionId", authMiddleware, async (req
     await prisma.zerionSubscription.delete({
       where: { id: subscription.id }
     });
+    console.log(response.data);
 
     res.json({
       success: true,
@@ -250,6 +262,8 @@ zerionRouter.patch("/subscriptions/:subscriptionId/enable", authMiddleware, asyn
       }
     });
 
+    console.log(response.data);
+
     res.json({
       success: true,
       data: response.data,
@@ -296,6 +310,8 @@ zerionRouter.patch("/subscriptions/:subscriptionId/disable", authMiddleware, asy
         updatedAt: new Date()
       }
     });
+
+    console.log(response.data);
 
     res.json({
       success: true,
