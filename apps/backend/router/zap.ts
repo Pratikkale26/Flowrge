@@ -169,17 +169,24 @@ router.post("/:zapId/activate", authMiddleware, async (req, res) => {
 
     type AddressMetadata = {
         address: string;
+        network?: "devnet" | "mainnet";
+        transactionType?: string;
         [key: string]: any;
     };
     const metadata = zapExists.trigger?.metadata;
     let address: string | undefined = undefined;
+    let network: "devnet" | "mainnet" = "devnet";
+    let transactionType: string = "Any";
 
     if (metadata) {
         const typedMetadata = metadata as AddressMetadata;
 
         address = typedMetadata.address;
+        network = typedMetadata.network || "devnet";
+        transactionType = typedMetadata.transactionType || "Any";
+        
         if (typeof address === 'string' && address.length > 0) {
-            console.log(`Solana Address: ${address}`);
+            console.log(`Solana Address: ${address}, Network: ${network}, Transaction Type: ${transactionType}`);
         }
     }
     
@@ -188,11 +195,14 @@ router.post("/:zapId/activate", authMiddleware, async (req, res) => {
     }
 
     try {
+        // Determine webhook type based on network
+        const webhookType = network === "devnet" ? "enhancedDevnet" : "enhanced";
+        
         const webhook = await helius.webhooks.create({
             webhookURL: callbackUrl,
             accountAddresses: [address],
-            transactionTypes: ["Any"],
-            webhookType: "rawDevnet",
+            transactionTypes: [transactionType],
+            webhookType: webhookType,
         });
         console.log(webhook);
 
