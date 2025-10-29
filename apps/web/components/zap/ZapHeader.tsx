@@ -10,7 +10,7 @@ interface ZapHeaderProps {
 
 export function ZapHeader({ totalPayment, isPublishing, onPublish }: ZapHeaderProps) {
     return (
-        <header className="flex justify-between items-center bg-card/50 backdrop-blur-sm p-6 border-b border-border">
+        <header className="flex justify-between items-center bg-card/50 backdrop-blur-sm p-6 px-80">
             <div className="flex items-center space-x-4">
                 <h1 className="text-2xl font-bold text-foreground">Create Flow</h1>
                 {totalPayment > 0 && (
