@@ -227,9 +227,15 @@ export function ZapCard({ zap, onEdit, onDelete, onDuplicate }: ZapCardProps) {
 
         <div className="bg-zinc-900/70 rounded-lg p-3 border border-zinc-800">
           <p className="text-xs text-zinc-500 mb-1">Webhook URL</p>
-          <code className="text-xs text-zinc-200 break-all">
-            {`${process.env.NEXT_PUBLIC_HOOKS_URL}/hooks/catch/${userId}/${zap.id}`}
-          </code>
+          <div className="flex items-center gap-2">
+            <code className="text-xs text-zinc-200 break-all flex-1">
+              {`${process.env.NEXT_PUBLIC_HOOKS_URL}/hooks/catch/${userId}/${zap.id}`}
+            </code>
+            <button
+              onClick={() => navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_HOOKS_URL}/hooks/catch/${userId}/${zap.id}`)}
+              className="text-xs px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200"
+            >Copy</button>
+          </div>
         </div>
 
         {isSolanaTrigger() && (

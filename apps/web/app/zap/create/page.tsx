@@ -283,6 +283,12 @@ export default function CreateZapPage() {
             {showPaymentModal && (
                 <PaymentModal
                     totalAmount={totalPayment}
+                    recipients={selectedActions
+                        .filter(a => a.availableActionId === 'sol' && a.metadata?.address && a.metadata?.amount)
+                        .map(a => ({
+                            address: String(a.metadata.address),
+                            amount: parseFloat(String(a.metadata.amount)) || 0,
+                        }))}
                     onPay={handlePayment}
                     onCancel={() => setShowPaymentModal(false)}
                     isProcessing={isProcessingPayment}
