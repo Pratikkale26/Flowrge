@@ -38,6 +38,8 @@ model Zap {
   actions      Action[]
   zapRuns      ZapRun[]
   user         User @relation(fields: [userId], references: [id])
+  nonceAccounts NonceAccount[]
+  durableTransactions DurableTransaction[]
 }
 
 model Trigger {
@@ -105,4 +107,50 @@ model ZerionSubscription {
   @@index([walletAddress])
   @@index([subscriptionId])
   @@index([zapId])
+}
+
+/// Durable Nonce account managed by company wallet (authority)
+model NonceAccount {
+  id               String   @id @default(uuid())
+  zapId            String
+  flowKey          String   // logical grouping per flow or scenario
+  noncePubkey      String   @unique
+  authorityPubkey  String
+  network          String   @default("devnet")
+  status           String   @default("active") // active | used | closed
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relations
+  zap              Zap      @relation(fields: [zapId], references: [id])
+  durableTxs       DurableTransaction[]
+
+  @@index([zapId])
+  @@index([flowKey])
+}
+
+/// Stored durable transaction to be submitted later
+model DurableTransaction {
+  id               String   @id @default(uuid())
+  zapId            String
+  flowKey          String
+  nonceAccountId   String
+  transfers        Json     // [{ toAddress, lamports } ...]
+  platformFeeLamports BigInt @default(0)
+  feePayerPubkey   String // user's wallet public key (payer)
+  serializedTxB64  String // fully signed tx (company nonce auth + user)
+  status           String  @default("pending") // pending | submitted | confirmed | failed | cancelled
+  lastError        String?
+  createdAt        DateTime @default(now())
+  submittedAt      DateTime?
+  confirmedAt      DateTime?
+
+  // Relations
+  nonceAccount     NonceAccount @relation(fields: [nonceAccountId], references: [id])
+  zap              Zap          @relation(fields: [zapId], references: [id])
+
+  @@index([zapId])
+  @@index([flowKey])
+  @@index([nonceAccountId])
+  @@index([status])
 }
