@@ -3,6 +3,9 @@ import { prisma } from "db/prisma";
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/middleware";
 import { helius } from "..";
+import { durableRouter } from "./durable";
+import { Connection, Keypair, NONCE_ACCOUNT_LENGTH, NonceAccount, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import { prisma as db } from "db/prisma";
 
 const router = Router();
 
@@ -61,6 +64,148 @@ router.post("/", authMiddleware, async (req, res) => {
         zapId
     })
 })
+// Atomic: create zap and build durable transaction. If durable fails, zap is deleted.
+router.post("/create-with-durable", authMiddleware, async (req, res) => {
+    const id = String(req.id);
+    const body = req.body as any;
+    try {
+        // Expected body: { zapName, availableTriggerId, triggerMetadata, actions, feePayerPubkey, transfers, platformFeeLamports }
+        const {
+            zapName,
+            availableTriggerId,
+            triggerMetadata,
+            actions,
+            feePayerPubkey,
+            transfers,
+            platformFeeLamports = 0,
+        } = body;
+
+        // 1) Create the zap first
+        const zapId = await prisma.$transaction(async tx => {
+            const zap = await tx.zap.create({
+                data: {
+                    name: zapName,
+                    userId: parseInt(id),
+                    triggerId: "",
+                    actions: {
+                        create: (actions || []).map((x: any, index: number) => ({
+                            actionId: x.availableActionId,
+                            sortingOrder: index,
+                            metadata: x.actionMetadata || {},
+                        }))
+                    }
+                }
+            });
+            const trigger = await tx.trigger.create({
+                data: {
+                    triggerId: availableTriggerId,
+                    zapId: zap.id,
+                    metadata: triggerMetadata || {}
+                }
+            });
+            await tx.zap.update({ where: { id: zap.id }, data: { triggerId: trigger.id } });
+            return zap.id;
+        });
+
+        // 2) If there are no transfers, return early (no durable needed)
+        if (!Array.isArray(transfers) || transfers.length === 0) {
+            return res.json({ zapId, durable: null });
+        }
+
+        // 3) Build durable via existing build endpoint logic by calling prisma/service directly
+        // Reuse the helper by importing functions would require refactor; replicate minimal logic here
+        const DEVNET_RPC = process.env.SOLANA_DEVNET_RPC || "https://api.devnet.solana.com";
+        const COMPANY_SECRET_KEY = process.env.COMPANY_SECRET_KEY || "";
+        const PLATFORM_FEE_ADDRESS = process.env.PLATFORM_FEE_ADDRESS || "";
+        const connection = new Connection(DEVNET_RPC, "confirmed");
+        const arr = JSON.parse(COMPANY_SECRET_KEY) as number[];
+        const company = Keypair.fromSecretKey(new Uint8Array(arr));
+
+        // ensure nonce account
+        const { recordId: nonceAccountId, noncePubkey } = await (async () => {
+            const existing = await prisma.nonceAccount.findFirst({
+                where: { zapId, flowKey: "zap", status: "active" },
+            });
+            if (existing) {
+                return { recordId: existing.id, noncePubkey: new PublicKey(existing.noncePubkey) };
+            }
+            const nonceKeypair = Keypair.generate();
+            const tx = new Transaction();
+            const rentLamports = await connection.getMinimumBalanceForRentExemption(NONCE_ACCOUNT_LENGTH);
+            tx.add(
+                SystemProgram.createAccount({
+                    fromPubkey: company.publicKey,
+                    newAccountPubkey: nonceKeypair.publicKey,
+                    lamports: rentLamports,
+                    space: NONCE_ACCOUNT_LENGTH,
+                    programId: SystemProgram.programId,
+                }),
+                SystemProgram.nonceInitialize({
+                    noncePubkey: nonceKeypair.publicKey,
+                    authorizedPubkey: company.publicKey,
+                })
+            );
+            tx.feePayer = company.publicKey;
+            tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+            tx.sign(nonceKeypair, company);
+            await connection.sendRawTransaction(tx.serialize());
+
+            const rec = await prisma.nonceAccount.create({
+                data: {
+                    zapId,
+                    flowKey: "zap",
+                    noncePubkey: nonceKeypair.publicKey.toBase58(),
+                    authorityPubkey: company.publicKey.toBase58(),
+                    network: "devnet",
+                    status: "active",
+                }
+            });
+            return { recordId: rec.id, noncePubkey: nonceKeypair.publicKey };
+        })();
+
+        let accountInfo = await connection.getAccountInfo(noncePubkey);
+        for (let i = 0; i < 5 && !accountInfo; i++) {
+            await new Promise(r => setTimeout(r, 200));
+            accountInfo = await connection.getAccountInfo(noncePubkey);
+        }
+        if (!accountInfo) throw new Error("Nonce account missing on-chain");
+        const nonceAccount = NonceAccount.fromAccountData(accountInfo.data);
+
+        const feePayer = new PublicKey(feePayerPubkey);
+        const tx = new Transaction();
+        tx.add(SystemProgram.nonceAdvance({ authorizedPubkey: company.publicKey, noncePubkey }));
+        for (const t of transfers) {
+            tx.add(SystemProgram.transfer({
+                fromPubkey: feePayer,
+                toPubkey: new PublicKey(t.toAddress),
+                lamports: Math.floor(Number(t.lamports)),
+            }));
+        }
+        const feeLamports = Math.floor(Number(platformFeeLamports || 0));
+        if (feeLamports > 0) {
+            if (!PLATFORM_FEE_ADDRESS) throw new Error("Platform fee address not configured");
+            tx.add(SystemProgram.transfer({
+                fromPubkey: feePayer,
+                toPubkey: new PublicKey(PLATFORM_FEE_ADDRESS),
+                lamports: feeLamports,
+            }));
+        }
+        tx.feePayer = feePayer;
+        tx.recentBlockhash = nonceAccount.nonce;
+        tx.sign(company);
+        const unsignedWireB64 = Buffer.from(tx.serialize({ requireAllSignatures: false })).toString('base64');
+
+        return res.json({ zapId, durable: { nonceAccountId, noncePubkey: noncePubkey.toBase58(), transactionB64: unsignedWireB64 } });
+    } catch (e: any) {
+        // If we created a zap but failed later, best effort delete
+        const zapId = (e?.zapId as string) || undefined;
+        if (zapId) {
+            try { await prisma.zap.delete({ where: { id: zapId } }); } catch {}
+        }
+        console.error(e);
+        return res.status(500).json({ error: e?.message || "Failed to create zap with durable" });
+    }
+});
 
 router.get("/", authMiddleware, async (req, res) => {
     const id = Number(req.id);

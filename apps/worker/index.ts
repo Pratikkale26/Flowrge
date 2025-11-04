@@ -3,7 +3,8 @@ import { Kafka } from "kafkajs";
 import { TOPIC_NAME } from "common/common";
 import { parseAction } from "./utils/parser";
 import { sendEmail } from "./utils/email";
-import { sendSol } from "./utils/sendSol1";
+import { submitDurableForZapFlow } from "./utils/sendDurable";
+import { cleanupUsedNonceAccounts } from "./utils/cleanupNonces";
 import { sendXPost } from "./utils/sendXPost";
 
 const kafka = new Kafka({
@@ -79,12 +80,13 @@ async function main() {
             }
 
             if(parsed.type === "sol") {
-                console.log("Sending SOL...");
-                await sendSol(
-                    parsed.data.address, 
-                    String(parsed.data.amount)
-                );
-                console.log("SOL sent successfully");
+                console.log("Submitting durable SOL transaction...");
+                const ok = await submitDurableForZapFlow(zapRunDetails.zap.id, "zap");
+                if (!ok) {
+                    console.error("No pending durable transaction found or submission failed");
+                } else {
+                    console.log("Durable SOL submitted successfully");
+                }
             }
 
             if(parsed.type === "x-post") {
@@ -139,6 +141,11 @@ async function main() {
             }])
         },
     })
+
+    // Periodic cleanup loop (runs in background)
+    setInterval(() => {
+        cleanupUsedNonceAccounts(5).catch((e) => console.error("Cleanup job error", e));
+    }, 60_000);
 }
 
 main();

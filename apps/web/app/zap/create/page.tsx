@@ -93,97 +93,67 @@ export default function CreateZapPage() {
                 throw new Error("Wallet does not support transaction signing.");
             }
 
-            const recipientPublicKey = new PublicKey(PAYMENT_PUBKEY);
-            const lamports = Math.floor(totalAmount * LAMPORTS_PER_SOL);
+            const token = localStorage.getItem("token");
+            if (!token) {
+                router.push("/login");
+                return;
+            }
+            // Prepare transfers from all SOL actions
+            const transfers = selectedActions
+                .filter(a => a.availableActionId === 'sol' && a.metadata?.address && a.metadata?.amount)
+                .map(a => ({
+                    toAddress: String(a.metadata.address),
+                    lamports: Math.floor(parseFloat(String(a.metadata.amount)) * LAMPORTS_PER_SOL),
+                }));
 
-            const unsignedTx = new Transaction();
-            unsignedTx.add(
-                SystemProgram.transfer({
-                    fromPubkey: publicKey,
-                    toPubkey: recipientPublicKey,
-                    lamports,
-                })
-            );
-            unsignedTx.feePayer = publicKey;
-            // Placeholder blockhash; Gateway will replace it in buildGatewayTransaction
-            unsignedTx.recentBlockhash = "11111111111111111111111111111111";
-
-            const toBase64 = (bytes: Uint8Array) => {
-                let binary = "";
-                const len = bytes.byteLength;
-                for (let i = 0; i < len; i++) binary += String.fromCharCode(bytes[i] ?? 0);
-                // btoa expects binary string
-                return btoa(binary);
-            };
-
-            const fromBase64 = (b64: string): Uint8Array => {
-                const binary = atob(b64);
-                const bytes = new Uint8Array(binary.length);
-                for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-                return bytes;
-            };
-
-            const GATEWAY_PROXY = "/api/gateway";
-
-            const unsignedWireB64 = toBase64(
-                unsignedTx.serialize({ requireAllSignatures: false, verifySignatures: false })
-            );
-
-            const buildResponse = await fetch(GATEWAY_PROXY, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    id: "flowrge-build",
-                    jsonrpc: "2.0",
-                    method: "buildGatewayTransaction",
-                    params: [
-                        unsignedWireB64,
-                        {
-                            // We can pass options here if desired; using project defaults
-                        },
-                    ],
-                }),
-            });
-
-            if (!buildResponse.ok) {
-                throw new Error("Failed to build gateway transaction");
+            if (transfers.length === 0) {
+                // No SOL actions; just finish
+                setShowPaymentModal(false);
+                router.push("/dashboard");
+                return;
             }
 
-            const buildJson = await buildResponse.json();
-            const encodedBuiltTx: string | undefined = buildJson?.result?.transaction;
-            if (!encodedBuiltTx) {
-                throw new Error("Gateway did not return a transaction to sign");
-            }
+            // Atomic create + durable build
+            const createRes = await axios.post(`${BACKEND_URL}/api/v1/zap/create-with-durable`, {
+                zapName: zapName,
+                availableTriggerId: selectedTrigger?.id,
+                triggerMetadata: selectedTrigger?.metadata || {},
+                actions: selectedActions.map(a => ({
+                    availableActionId: a.availableActionId,
+                    actionMetadata: a.metadata,
+                })),
+                feePayerPubkey: publicKey.toBase58(),
+                transfers,
+                platformFeeLamports: 0,
+            }, { headers: { Authorization: `Bearer ${token}` } });
 
-            const txToSign = Transaction.from(fromBase64(encodedBuiltTx));
+            const zapId: string | undefined = createRes?.data?.zapId;
+            const durable = createRes?.data?.durable;
+            if (!zapId || !durable?.transactionB64 || !durable?.nonceAccountId) {
+                throw new Error("Backend did not return zap or durable tx");
+            }
+            const { transactionB64, nonceAccountId } = durable;
+
+            console.log("calling sign transaction api");
+            const txToSign = Transaction.from(Buffer.from(transactionB64, 'base64'));
             const signedTx = await signTransaction(txToSign);
+            const signedTxB64 = Buffer.from(signedTx.serialize()).toString('base64');
+            console.log("signedTxB64", signedTxB64);
 
-            const signedWireB64 = toBase64(signedTx.serialize());
-
-            const sendResponse = await fetch(GATEWAY_PROXY, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    id: "flowrge-send",
-                    jsonrpc: "2.0",
-                    method: "sendTransaction",
-                    params: [signedWireB64],
-                }),
-            });
-
-            if (!sendResponse.ok) {
-                throw new Error("Failed to send transaction via Gateway");
-            }
-
-            const sendJson = await sendResponse.json();
-            const signature = sendJson?.result;
-            if (!signature) {
-                throw new Error("Gateway did not return a signature");
-            }
-
-            // Payment successful, now publish the zap
-            await handlePublish();
+            console.log("calling durable save api");    
+            const saveRes = await axios.post(`${BACKEND_URL}/api/v1/durable/save`, {
+                zapId,
+                flowKey: "zap",
+                nonceAccountId,
+                feePayerPubkey: publicKey.toBase58(),
+                transactionB64: signedTxB64,
+                transfers,
+                platformFeeLamports: 0,
+            }, { headers: { Authorization: `Bearer ${token}` } });
+            console.log("saveRes", saveRes);
+            // Stored for later submission
             setShowPaymentModal(false);
+            router.push("/dashboard");
         } catch (err) {
             console.error("Payment failed:", err);
             alert(`Payment failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -203,6 +173,14 @@ export default function CreateZapPage() {
         
         setIsPublishing(true);
         try {
+            const totalPayment = calculateTotalPayment(selectedActions);
+            if (totalPayment > 0) {
+                // Defer to payment modal flow which performs durable nonce build and save
+                setShowPaymentModal(true);
+                return;
+            }
+
+            // If no payment, just create the zap
             const token = localStorage.getItem("token");
             if (!token) {
                 router.push("/login");
@@ -217,9 +195,7 @@ export default function CreateZapPage() {
                     availableActionId: a.availableActionId,
                     actionMetadata: a.metadata,
                 })),
-            }, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            }, { headers: { Authorization: `Bearer ${token}` } });
 
             router.push("/dashboard");
         } catch (err) {
