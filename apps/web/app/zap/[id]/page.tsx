@@ -15,6 +15,7 @@ interface ZapDetails {
         zapId: string;
         actionId: string;
         sortingOrder: number;
+        metadata?: any;
         type: {
             id: string;
             name: string;
@@ -25,6 +26,7 @@ interface ZapDetails {
         id: string;
         zapId: string;
         triggerId: string;
+        metadata?: any;
         type: {
             id: string;
             name: string;
@@ -129,6 +131,9 @@ export default function ZapDetailPage() {
             minute: '2-digit'
         });
     };
+    const pretty = (obj: any) => {
+        try { return JSON.stringify(obj ?? {}, null, 2); } catch { return "{}"; }
+    };
 
     return (
         <div className="min-h-screen bg-background">
@@ -198,6 +203,41 @@ export default function ZapDetailPage() {
                                         </div>
                                     </div>
                                 ))}
+                            </div>
+                        </div>
+
+                        {/* Trigger & Actions Details */}
+                        <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-6">
+                            <h2 className="text-lg font-semibold text-foreground mb-4">Details</h2>
+                            <div className="space-y-6">
+                                <div>
+                                    <p className="text-sm text-muted-foreground mb-2">Trigger</p>
+                                    <div className="rounded-lg border border-border bg-muted/20 p-3">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            {zap.trigger && <img src={zap.trigger.type.image} alt={zap.trigger.type.name} className="w-6 h-6" />}
+                                            <span className="text-sm text-foreground font-medium">{zap.trigger?.type?.name || 'Unknown'}</span>
+                                        </div>
+                                        <pre className="text-xs text-foreground/90 whitespace-pre-wrap break-words overflow-auto max-h-56">{pretty(zap.trigger?.metadata)}</pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <p className="text-sm text-muted-foreground mb-2">Actions</p>
+                                    <div className="space-y-3">
+                                        {zap.actions?.map((a, idx) => (
+                                            <div key={a.id} className="rounded-lg border border-border bg-muted/20 p-3">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center gap-3">
+                                                        <img src={a.type.image} alt={a.type.name} className="w-6 h-6" />
+                                                        <span className="text-sm text-foreground font-medium">{a.type.name}</span>
+                                                    </div>
+                                                    <span className="text-xs text-muted-foreground">Step {idx + 1}</span>
+                                                </div>
+                                                <pre className="text-xs text-foreground/90 whitespace-pre-wrap break-words overflow-auto max-h-56">{pretty(a.metadata)}</pre>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -287,11 +327,11 @@ export default function ZapDetailPage() {
                                     <label className="text-sm text-muted-foreground mb-1 block">Webhook URL</label>
                                     <div className="bg-muted/30 rounded-lg p-3">
                                         <code className="text-xs text-foreground break-all">
-                                            {`${process.env.NEXT_PUBLIC_HOOKS_URL}/hooks/catch/1/${zap.id}`}
+                                            {`${process.env.NEXT_PUBLIC_HOOKS_URL}/hooks/catch/${zap.userId}/${zap.id}`}
                                         </code>
                                     </div>
                                 </div>
-                                <button onClick={() => navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_HOOKS_URL}/hooks/catch/1/${zap.id}`)} className="w-full text-sm bg-accent/10 hover:bg-accent/20 text-accent rounded-lg py-2 px-3 transition-colors">
+                                <button onClick={() => navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_HOOKS_URL}/hooks/catch/${zap.userId}/${zap.id}`)} className="w-full text-sm bg-accent/10 hover:bg-accent/20 text-accent rounded-lg py-2 px-3 transition-colors">
                                     Copy URL
                                 </button>
                             </div>
