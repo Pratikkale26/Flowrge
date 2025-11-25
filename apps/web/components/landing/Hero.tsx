@@ -50,15 +50,15 @@ export default function LandingHero() {
             {/* Centered Content */}
             <div className={`transition-all duration-1000 max-w-4xl text-center px-4 lg:px-0 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
               <Badge variant="secondary" className="mb-3 lg:mb-2 px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm bg-white/5 text-white border-white/10 hover:bg-white/10 transition-all duration-300">
-                🚀 Now in Early Access
-              </Badge>
+            🚀 Now in Early Access
+          </Badge>
               <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-3 lg:mb-4 leading-[1.1] tracking-tight">
                 <span className="block text-white animate-fade-in-up" style={{ animationDelay: "0.2s" }}>Automate on Solana</span>{" "}
                 <span className="block bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-blue)] bg-clip-text text-transparent animate-fade-in-up" style={{ animationDelay: "0.4s" }}>Without Code</span>
-              </h1>
+          </h1>
               <p className="max-w-2xl lg:max-w-3xl text-sm md:text-md lg:text-lg text-zinc-400 mb-6 lg:mb-6 leading-relaxed mx-auto animate-fade-in-up px-4 lg:px-0" style={{ animationDelay: "0.8s" }}>
-                Triggers and actions across Web3 & Web2 without writing code. The first automation platform built for the Solana ecosystem.
-              </p>
+            Triggers and actions across Web3 & Web2 without writing code. The first automation platform built for the Solana ecosystem.
+          </p>
               <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center animate-fade-in-up px-4 lg:px-0" style={{ animationDelay: "1s" }}>
                 <Button 
                   size="lg" 
@@ -69,7 +69,7 @@ export default function LandingHero() {
                   }}
                 >
                   Forge Now <ArrowRight className="ml-2 w-4 h-4 lg:w-5 lg:h-5 group-hover:translate-x-1 transition-transform" />
-                </Button>
+            </Button>
               </div>
             </div>
           </div>

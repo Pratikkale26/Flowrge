@@ -376,8 +376,8 @@ export default function LandingFeatures() {
                  <h3 ref={box3HeaderRef} className="text-xl lg:text-2xl font-bold text-white mb-4 lg:mb-6">Visual Flow Builder</h3>
                  <p ref={box3DescRef} className="text-white text-sm lg:text-md leading-relaxed mb-6 lg:mb-10">
                    Create complex automations with our intuitive drag-and-drop interface. Monitor logs, track performance, and manage your flows all in one place.
-                 </p>
-               </div>
+          </p>
+        </div>
                
                {/* Feature list - positioned at bottom */}
                <div ref={box3ListRef} className="space-y-2">
@@ -399,10 +399,10 @@ export default function LandingFeatures() {
              {/* Right side - Inner box - Hidden on mobile */}
              <div ref={box3CardRef} className="absolute right-[-10px] top-[100px] w-[600px] h-[500px] rounded-[17px] bg-[#111111] border border-white/16 flex-shrink-0 hidden lg:block" style={{ boxShadow: '0 0 0 10px rgba(255, 255, 255, 0.1)' }}>
                {/* Inner box content can be added here */}
-             </div>
-           </div>
-         </div>
+              </div>
+              </div>
+              </div>
+        </div>
       </div>
-    </div>
   )
 }

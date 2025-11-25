@@ -48,7 +48,7 @@ export default function LandingCTA() {
                 </p>
                 <p className="max-w-xl pt-2 lg:pt-3 text-left text-xs lg:text-sm text-neutral-200">
                   Build powerful automations for Solana with Flowrge. Connect Web3 and Web2 services with simple drag-and-drop flows. No coding required.
-                </p>
+        </p>
               </div>
               
               {/* Waitlist Form */}
@@ -65,9 +65,9 @@ export default function LandingCTA() {
                   type="submit" 
                   className="w-full sm:w-auto h-10 lg:h-12 px-6 lg:px-8 text-sm lg:text-base bg-white text-black font-semibold rounded-md hover:bg-gray-100 transition-all duration-300 whitespace-nowrap shadow-lg"
                 >
-                  Join Waitlist
+            Join Waitlist
                 </button>
-              </form>
+        </form>
             </div>
           </footer>
           
@@ -156,7 +156,7 @@ export default function LandingCTA() {
                   </div>
                 </div>
               </div>
-            </div>
+        </div>
           </div>
         </footer>
       </div>
