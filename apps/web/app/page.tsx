@@ -1,34 +1,38 @@
 "use client";
 
-import LandingNav from "../components/landing/Nav";
 import LandingHero from "../components/landing/Hero";
 import LandingFeatures from "../components/landing/Features";
-import LandingComparison from "../components/landing/Comparison";
-import LandingUseCases from "../components/landing/UseCases";
-import LandingSocialProof from "../components/landing/SocialProof";
+import HowItWorks from "../components/landing/HowItWorks";
+import FAQ from "../components/landing/FAQ";
 import LandingCTA from "../components/landing/CTA";
-import CursorGlow from "../components/landing/CursorGlow";
-import LandingFooter from "../components/landing/Footer";
+import Image from "next/image";
 
 export default function FlowrgeLanding() {
   return (
-    <div className="relative w-full overflow-x-hidden">
-      {/* Gradient Background */}
-      <div className="fixed inset-0 bg-gradient-to-br from-background via-background to-card/20 animate-gradient-shift -z-10" />
-
-      {/* Cursor Glow */}
-      <CursorGlow />
+    <div className="relative w-full">
+      {/* Purple Background Image - Behind Hero */}
+      <div className="absolute top-0 left-0 w-full h-screen -z-10 overflow-hidden opacity-50">
+        <Image 
+          src="/purplebg.jpg" 
+          alt="Background" 
+          fill
+          className="object-cover"
+          priority
+        />
+      </div>
 
       {/* Landing Content */}
-      <div className="relative z-10 flex flex-col w-full">
-        <LandingNav />
+      <div className="relative flex flex-col w-full">
+
+        {/* Hero Section */}
         <LandingHero />
-        <LandingFeatures />
-        <LandingComparison />
-        <LandingUseCases />
-        <LandingSocialProof />
-        <LandingCTA />
-        <LandingFooter />
+
+        <div style={{ backgroundColor: '#0a0a0a' }}>
+          <LandingFeatures />
+          <HowItWorks />
+          <FAQ />
+          <LandingCTA />
+        </div>
       </div>
     </div>
   );

@@ -36,8 +36,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} bg-background text-foreground overflow-x-hidden`}>
         <WalletContextProvider>
           <Appbar />
-          {/* Reserve space for fixed header */}
-          <main className="pt-16 relative z-0">{children}</main>
+          <main className="relative z-0">{children}</main>
         </WalletContextProvider>
       </body>
     </html>
