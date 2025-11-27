@@ -11,7 +11,7 @@ export default function FlowrgeLanding() {
   return (
     <div className="relative w-full">
       {/* Purple Background Image - Behind Hero */}
-      <div className="absolute top-0 left-0 w-full h-screen -z-10 overflow-hidden opacity-50">
+      {/* <div className="absolute top-0 left-0 w-full h-screen -z-10 overflow-hidden opacity-50">
         <Image
           src="/purplebg.jpg"
           alt="Background"
@@ -19,7 +19,7 @@ export default function FlowrgeLanding() {
           className="object-cover"
           priority
         />
-      </div>
+      </div> */}
 
       {/* Landing Content */}
       <div className="relative flex flex-col w-full">
