@@ -22,7 +22,7 @@ export default function LandingCTA() {
   }
 
   return (
-    <section id="waitlist" className="w-full py-8 lg:py-12 xl:py-20 px-4 relative z-10" style={{ backgroundColor: '#0a0a0a' }}>
+    <section id="waitlist" className="w-full py-6 lg:py-8 xl:py-4 px-4 relative z-10" style={{ backgroundColor: '#0a0a0a' }}>
       <div className="mx-auto" style={{ maxWidth: '78rem' }}>
         {/* Outer container with muted background and border */}
         <footer className="bg-zinc-900/30 border border-zinc-800 w-full rounded-2xl lg:rounded-3xl p-1.5 lg:p-2">
