@@ -282,7 +282,7 @@ export default function FlowBuilderPreview() {
       </div>
 
       {/* 5. Navigation & Status - MOVED TO LEFT BELOW TRIGGER NODE */}
-      <div className="absolute top-[235px] left-[20px] z-30 flex items-center gap-2">
+      <div className="absolute bottom-[10px] right-[60px] z-30 flex items-center gap-2">
         {/* Arrows */}
         <div className="flex items-center bg-zinc-800/50 rounded-lg border border-white/10 p-1 backdrop-blur-md">
             <button 

@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import FlowPreview from "./FlowPreview"
+import FlowBuilderPreview from "./FlowPreview"
+import { CheckCircle2 } from "lucide-react"
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -370,38 +372,77 @@ export default function LandingFeatures() {
            </div>
             
            {/* Second Row - Box 3 (Full width) */}
-           <div className="col-span-1 lg:col-span-3 p-6 lg:p-8 h-[320px] lg:h-[380px] rounded-[20px] lg:rounded-[30px] bg-[#111111] flex items-start justify-between relative overflow-hidden">
-             {/* Left side - Content */}
-             <div className="w-full max-w-xl flex-1 pr-6 lg:pr-12 py-4 flex flex-col justify-between">
-               <div>
-                 <h3 ref={box3HeaderRef} className="text-xl lg:text-2xl font-bold text-white mb-4 lg:mb-6">Visual Flow Builder</h3>
-                 <p ref={box3DescRef} className="text-white text-sm lg:text-md leading-relaxed mb-6 lg:mb-10">
-                   Create complex automations with our intuitive drag-and-drop interface. Monitor logs, track performance, and manage your flows all in one place.
-          </p>
-        </div>
-               
-               {/* Feature list - positioned at bottom */}
-               <div ref={box3ListRef} className="space-y-2">
-                 <div className="flex items-center gap-2">
-                   <div className="w-3 h-3 bg-purple-500 rounded-full flex-shrink-0"></div>
-                   <span className="text-white text-sm">No-code workflow builder</span>
-                 </div>
-                 <div className="flex items-center gap-2">
-                   <div className="w-3 h-3 bg-purple-500 rounded-full flex-shrink-0"></div>
-                   <span className="text-white text-sm">Real-time monitoring & logs</span>
-                 </div>
-                 <div className="flex items-center gap-2">
-                   <div className="w-3 h-3 bg-purple-500 rounded-full flex-shrink-0"></div>
-                   <span className="text-white text-sm">Performance analytics</span>
-                 </div>
-               </div>
-             </div>
-             
-             {/* Right side - Inner box - Hidden on mobile */}
-             <div ref={box3CardRef} className="absolute right-[-10px] top-[100px] w-[600px] h-[500px] rounded-[17px] bg-[#111111] border border-white/16 flex-shrink-0 hidden lg:block" style={{ boxShadow: '0 0 0 10px rgba(255, 255, 255, 0.1)' }}>
-               <FlowPreview />
+          <div className="col-span-1 lg:col-span-3 h-auto min-h-[500px] lg:h-[450px] rounded-[30px] bg-[#111111] border border-white/10 flex flex-col lg:flex-row items-center justify-between relative overflow-hidden group">
+            
+            {/* Background Gradient Effect */}
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-500/10 blur-[120px] rounded-full pointer-events-none" />
+
+            {/* Left side - Content */}
+            <div className="w-full lg:w-[40%] p-8 lg:p-12 z-20 flex flex-col justify-center h-full">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-medium mb-6">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+                  </span>
+                  Live Editor
+                </div>
+                
+                <h3 ref={box3HeaderRef} className="text-3xl lg:text-4xl font-bold text-white mb-4 lg:mb-6 leading-tight">
+                  Visual Flow Builder
+                </h3>
+                
+                <p ref={box3DescRef} className="text-zinc-400 text-sm lg:text-base leading-relaxed mb-8">
+Create complex automations with our intuitive drag-and-drop interface. Monitor logs, track performance, and manage your flows all in one place.                </p>
               </div>
+              
+              {/* Feature list */}
+              <div ref={box3ListRef} className="space-y-4">
+                {[
+                  "No-code drag & drop interface",
+                  "Real-time execution logs",
+                  "Sub-second latency monitoring"
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-3 group/item">
+                    <div className="p-1 rounded-full bg-zinc-800 text-purple-400 group-hover/item:bg-purple-500 group-hover/item:text-white transition-colors">
+                      <CheckCircle2 className="w-4 h-4" />
+                    </div>
+                    <span className="text-zinc-300 text-sm font-medium">{item}</span>
+                  </div>
+                ))}
               </div>
+            </div>
+            
+            {/* Right side - The Flow Preview */}
+            <div className="relative w-full lg:w-[65%] h-[400px] lg:h-full lg:absolute lg:right-0 lg:top-0 bg-zinc-900/50 lg:bg-transparent mt-8 lg:mt-0">
+              {/* This container acts as the "Window" */}
+              <div 
+                ref={box3CardRef} 
+                className="absolute right-0 lg:right-[-50px] top-[20px] lg:top-[40px] bottom-[20px] lg:bottom-[40px] left-4 lg:left-auto w-auto lg:w-[750px] rounded-l-2xl lg:rounded-2xl border border-white/10 bg-[#0c0c0c] shadow-2xl overflow-hidden"
+                style={{ 
+                  boxShadow: '-20px 0 50px -10px rgba(0,0,0,0.5)' 
+                }}
+              >
+                {/* Header of the "Window" */}
+                <div className="h-10 border-b border-white/5 flex items-center px-4 gap-2 bg-zinc-900/50 backdrop-blur-md">
+                   <div className="flex gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50" />
+                      <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50" />
+                      <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50" />
+                   </div>
+                   <div className="ml-4 text-[10px] text-zinc-600 font-mono">workflow_v1.json</div>
+                </div>
+
+                {/* The Component You Built */}
+                <div className="w-full h-[calc(100%-40px)] relative">
+                   <FlowBuilderPreview />
+                   
+                   {/* Gradient Overlay to blend it into the text on the left (Desktop only) */}
+                   <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-[#0c0c0c] to-transparent pointer-events-none hidden lg:block" />
+                </div>
+              </div>
+            </div>
+          </div>
               </div>
         </div>
       </div>
