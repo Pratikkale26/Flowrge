@@ -1,9 +1,10 @@
 "use client"
 
 import { Globe } from "../../components/ui/globe"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
+import FlowPreview from "./FlowPreview"
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -398,7 +399,7 @@ export default function LandingFeatures() {
              
              {/* Right side - Inner box - Hidden on mobile */}
              <div ref={box3CardRef} className="absolute right-[-10px] top-[100px] w-[600px] h-[500px] rounded-[17px] bg-[#111111] border border-white/16 flex-shrink-0 hidden lg:block" style={{ boxShadow: '0 0 0 10px rgba(255, 255, 255, 0.1)' }}>
-               {/* Inner box content can be added here */}
+               <FlowPreview />
               </div>
               </div>
               </div>
