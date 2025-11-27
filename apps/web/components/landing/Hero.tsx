@@ -53,7 +53,7 @@ export default function LandingHero() {
       </div>
 
       {/* --- NAVBAR (Floating Capsule) --- */}
-      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[100%] max-w-2xl animate-in fade-in slide-in-from-top-4 duration-1000">
+      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[100%] max-w-3xl animate-in fade-in slide-in-from-top-4 duration-1000">
         <div className="flex w-full items-center justify-between py-2.5 px-4 bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl transition-all duration-300 hover:border-white/20 hover:bg-zinc-900/60">
           
           {/* Logo */}
