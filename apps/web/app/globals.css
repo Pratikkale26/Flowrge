@@ -3,6 +3,9 @@
 
 @custom-variant dark (&:is(.dark *));
 
+html {
+  zoom: 1.25; /* Scales everything up by 25% */
+}
 :root {
   /* Updated theme for Flowrge with dark mode and neon accents */
   --background: oklch(0.08 0.02 240);

@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState } from "react"
-import { ArrowRight, Zap, Github, ChevronRight, Terminal, X, Twitter } from "lucide-react"
+import { ArrowRight, Zap, Github, ChevronRight, Terminal, Twitter } from "lucide-react"
 import { Badge } from "../ui/badge"
 import { Button } from "../ui/button"
 import { useRouter } from "next/navigation"
@@ -16,7 +16,8 @@ export default function LandingHero() {
   }, [])
 
   return (
-    <section className="relative overflow-hidden min-h-screen flex flex-col items-center justify-center pt-20 lg:pt-0 bg-[#050505] selection:bg-purple-500/30">
+    // Changed min-h-screen to min-h-[85vh] and reduced pt-20 to pt-12
+    <section className="relative overflow-hidden min-h-[85vh] flex flex-col items-center justify-center pt-12 lg:pt-0 bg-[#050505] selection:bg-purple-500/30">
       
       {/* --- CSS for Background Animation --- */}
       <style jsx>{`
@@ -52,7 +53,7 @@ export default function LandingHero() {
       </div>
 
       {/* --- NAVBAR (Floating Capsule) --- */}
-      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-2xl animate-in fade-in slide-in-from-top-4 duration-1000">
+      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[100%] max-w-2xl animate-in fade-in slide-in-from-top-4 duration-1000">
         <div className="flex w-full items-center justify-between py-2.5 px-4 bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl transition-all duration-300 hover:border-white/20 hover:bg-zinc-900/60">
           
           {/* Logo */}
@@ -93,8 +94,8 @@ export default function LandingHero() {
         
         <div className={`transition-all duration-1000 ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           
-          {/* Announcement Pill */}
-          <div className="inline-flex items-center justify-center mb-8">
+          {/* Announcement Pill - Reduced Margin */}
+          <div className="inline-flex items-center justify-center mb-6">
             <Badge 
                 variant="outline" 
                 className="bg-zinc-900/30 hover:bg-zinc-900/60 border-white/10 text-zinc-300 px-4 py-1.5 rounded-full backdrop-blur-md transition-all cursor-pointer group hover:border-purple-500/30"
@@ -110,8 +111,8 @@ export default function LandingHero() {
             </Badge>
           </div>
 
-          {/* Headline */}
-          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-8">
+          {/* Headline - Reduced Margin */}
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6">
             <span className="block text-white drop-shadow-sm">
               Automate Solana
             </span>
@@ -120,8 +121,8 @@ export default function LandingHero() {
             </span>
           </h1>
 
-          {/* Subheadline */}
-          <p className="max-w-2xl mx-auto text-base sm:text-lg lg:text-xl text-zinc-400 mb-10 leading-relaxed">
+          {/* Subheadline - Reduced Margin */}
+          <p className="max-w-2xl mx-auto text-base sm:text-lg lg:text-xl text-zinc-400 mb-8 leading-relaxed">
             Build triggers, actions, and complex DeFi workflows in minutes. 
             The first drag-and-drop automation layer built for the Solana ecosystem.
           </p>
@@ -132,7 +133,7 @@ export default function LandingHero() {
               size="lg" 
               onClick={() => {
                 const token = localStorage.getItem("token"); 
-                if(token) router.push("#waitlist");
+                if(token) router.push("/dashboard");
                 else router.push("#waitlist");
               }}
               className="w-full sm:w-auto h-12 px-8 rounded-full bg-white text-black hover:bg-zinc-200 hover:scale-105 transition-all duration-200 font-semibold text-base shadow-[0_0_30px_-10px_rgba(255,255,255,0.3)]"
