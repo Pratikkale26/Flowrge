@@ -19,7 +19,7 @@ export default function LandingHero() {
     <section className="relative overflow-hidden py-12 lg:py-20 min-h-screen flex items-center">
       {/* Navbar inside Hero */}
       <div className="fixed top-2 lg:top-4 left-1/2 -translate-x-1/2 z-50 w-full px-2 lg:px-4">
-        <div className="max-w-5xl mx-auto flex w-full items-center justify-between py-2 lg:py-3 transition-all duration-300 lg:px-4 bg-zinc-800/30 rounded-2xl px-3 lg:px-4 backdrop-blur-lg border border-white/10">
+        <div className="max-w-5xl mx-auto flex w-full items-center justify-between py-2 lg:py-3 transition-all duration-300 lg:px-4 bg-zinc-800/30 rounded-2xl px-3 backdrop-blur-lg border border-white/10">
           {/* Logo */}
           <div
             onClick={() => router.push("/")}
@@ -34,6 +34,7 @@ export default function LandingHero() {
           </div>
           
           <Button
+            onClick={() => router.push("#waitlist")}
             variant="outline"
             size="sm"
             className="border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800 bg-transparent text-white hover:scale-105 transition-all duration-300 text-xs lg:text-sm px-3 lg:px-4"
@@ -65,7 +66,7 @@ export default function LandingHero() {
                   className="bg-white hover:bg-zinc-100 text-zinc-900 px-6 lg:px-8 py-5 lg:py-6 text-base lg:text-lg font-semibold hover:scale-105 transition-all duration-300 group w-full sm:w-auto" 
                   onClick={() => {
                     const token = localStorage.getItem("token"); 
-                    if(token) router.push("/dashboard")
+                    if(token) router.push("#waitlist");
                   }}
                 >
                   Forge Now <ArrowRight className="ml-2 w-4 h-4 lg:w-5 lg:h-5 group-hover:translate-x-1 transition-transform" />
