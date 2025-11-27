@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState } from "react"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Zap, Github, CornerDownLeft, GitFork } from "lucide-react"
 import { Badge } from "../ui/badge"
 import { Button } from "../ui/button"
 import { useRouter } from "next/navigation"
@@ -10,45 +10,71 @@ import { useRouter } from "next/navigation"
 export default function LandingHero() {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false)
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
 
   useEffect(() => {
     setIsVisible(true)
-    const handleMouseMove = (e: MouseEvent) => setMousePosition({ x: e.clientX, y: e.clientY })
-    window.addEventListener("mousemove", handleMouseMove)
-    return () => window.removeEventListener("mousemove", handleMouseMove)
   }, [])
 
   return (
-    <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative z-10">
-      <div className="max-w-7xl mx-auto">
-        <div className={`text-center transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
-          <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-all duration-300 animate-pulse-subtle">
+    <section className="relative overflow-hidden py-12 lg:py-20 min-h-screen flex items-center">
+      {/* Navbar inside Hero */}
+      <div className="fixed top-2 lg:top-4 left-1/2 -translate-x-1/2 z-50 w-full px-2 lg:px-4">
+        <div className="max-w-5xl mx-auto flex w-full items-center justify-between py-2 lg:py-3 transition-all duration-300 lg:px-4 bg-zinc-800/30 rounded-2xl px-3 lg:px-4 backdrop-blur-lg border border-white/10">
+          {/* Logo */}
+          <div
+            onClick={() => router.push("/")}
+            className="flex items-center gap-1.5 lg:gap-2 cursor-pointer group"
+          >
+            <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-br from-[var(--neon-purple)] to-[var(--neon-blue)] rounded-lg lg:rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110">
+              <Zap className="w-4 h-4 lg:w-5 lg:h-5 text-white group-hover:drop-shadow-glow" />
+            </div>
+            <span className="text-base lg:text-lg font-semibold tracking-wide group-hover:text-primary transition-colors text-white">
+              Flowrge
+            </span>
+          </div>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800 bg-transparent text-white hover:scale-105 transition-all duration-300 text-xs lg:text-sm px-3 lg:px-4"
+          >
+            Join Waitlist
+          </Button>
+        </div>
+      </div>
+
+      {/* Hero Content */}
+      <div className="flex items-center justify-center pt-16 lg:pt-20 pb-8 lg:pb-12 mx-auto w-full">
+        <div className="mx-auto w-full px-4 lg:px-6" style={{ maxWidth: '78rem' }}>
+          <div className="flex items-center justify-center">
+            {/* Centered Content */}
+            <div className={`transition-all duration-1000 max-w-4xl text-center px-4 lg:px-0 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
+              <Badge variant="secondary" className="mb-3 lg:mb-2 px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm bg-white/5 text-white border-white/10 hover:bg-white/10 transition-all duration-300">
             🚀 Now in Early Access
           </Badge>
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 text-balance leading-tight">
-            <span className="inline-block animate-fade-in-up" style={{ animationDelay: "0.2s" }}>Automate on</span>{" "}
-            <span className="bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-blue)] bg-clip-text text-transparent neon-text animate-fade-in-up inline-block" style={{ animationDelay: "0.4s" }}>Solana</span>{" "}
-            <span className="inline-block animate-fade-in-up" style={{ animationDelay: "0.6s" }}>in minutes</span>
+              <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-3 lg:mb-4 leading-[1.1] tracking-tight">
+                <span className="block text-white animate-fade-in-up" style={{ animationDelay: "0.2s" }}>Automate on Solana</span>{" "}
+                <span className="block bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-blue)] bg-clip-text text-transparent animate-fade-in-up" style={{ animationDelay: "0.4s" }}>Without Code</span>
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto text-pretty leading-relaxed animate-fade-in-up" style={{ animationDelay: "0.8s" }}>
+              <p className="max-w-2xl lg:max-w-3xl text-sm md:text-md lg:text-lg text-zinc-400 mb-6 lg:mb-6 leading-relaxed mx-auto animate-fade-in-up px-4 lg:px-0" style={{ animationDelay: "0.8s" }}>
             Triggers and actions across Web3 & Web2 without writing code. The first automation platform built for the Solana ecosystem.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up" style={{ animationDelay: "1s" }}>
-            <Button size="lg" className="bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-blue)] hover:from-[var(--neon-purple)]/80 hover:to-[var(--neon-blue)]/80 text-white px-8 py-6 text-lg animate-pulse-glow hover:scale-105 transition-all duration-300 hover:shadow-2xl group" onClick={() => {
-                const token = localStorage.getItem("token"); if(token) router.push("/dashboard")
-              }
-            }>
-              Forge Now <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center animate-fade-in-up px-4 lg:px-0" style={{ animationDelay: "1s" }}>
+                <Button 
+                  size="lg" 
+                  className="bg-white hover:bg-zinc-100 text-zinc-900 px-6 lg:px-8 py-5 lg:py-6 text-base lg:text-lg font-semibold hover:scale-105 transition-all duration-300 group w-full sm:w-auto" 
+                  onClick={() => {
+                    const token = localStorage.getItem("token"); 
+                    if(token) router.push("/dashboard")
+                  }}
+                >
+                  Forge Now <ArrowRight className="ml-2 w-4 h-4 lg:w-5 lg:h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
-            {/* <Button variant="outline" size="lg" className="border-primary/20 hover:border-primary/60 hover:bg-primary/10 px-8 py-6 text-lg bg-transparent hover:scale-105 transition-all duration-300 hover:shadow-neon group">
-              Watch Demo
-            </Button> */}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div className="absolute top-1/2 left-10 w-20 h-20 bg-gradient-to-br from-[var(--neon-purple)]/20 to-[var(--neon-blue)]/20 rounded-full blur-xl animate-float-slow hover:scale-150 transition-all duration-500" style={{ transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)` }}></div>
-      <div className="absolute top-1/3 right-10 w-32 h-32 bg-gradient-to-br from-[var(--neon-green)]/20 to-[var(--neon-purple)]/20 rounded-full blur-xl animate-float-slow hover:scale-150 transition-all duration-500" style={{ animationDelay: "1s", transform: `translate(${mousePosition.x * -0.015}px, ${mousePosition.y * -0.015}px)` }}></div>
     </section>
   )
 }

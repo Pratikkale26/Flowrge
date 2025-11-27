@@ -14,10 +14,15 @@ import { motion, AnimatePresence } from "framer-motion";
 export const Appbar = () => {
   const router = useRouter();
   const { publicKey, signMessage } = useWallet();
+  const [isLandingPage, setIsLandingPage] = useState(false);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setIsLandingPage(window.location.pathname === '/');
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -58,9 +63,14 @@ export const Appbar = () => {
     ? [{ label: "Dashboard", onClick: () => router.push("/dashboard") }]
     : [{ label: "About", onClick: () => router.push("/about") }];
 
+  // Hide on landing page
+  if (isLandingPage) {
+    return null;
+  }
+
   return (
-    <header className="w-full bg-background/60 backdrop-blur-md border-b border-border fixed top-0 z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-6 flex justify-between items-center h-16">
+    <header className="w-full fixed top-4 z-50 flex justify-center px-4">
+      <div className="w-full mx-auto px-4 flex justify-between items-center h-14 border-2 border-zinc-800 rounded-md bg-black/20" style={{ maxWidth: '74rem' }}>
         {/* Logo */}
         <div
           onClick={() => router.push("/")}
